@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: 13 17 23; /* #0D1117 Dark Blue */
+  --secondary: 0 112 243; /* #0070F3 Electric Blue */
+  --accent: 255 77 109; /* #FF4D6D Neon Pink */
+  --background: 13 17 23; /* #0D1117 Dark Blue */
+  --foreground: 229 231 235; /* #E5E7EB Text Primary */
+  --text: 229 231 235; /* #E5E7EB Text Primary */
+  --text-muted: 161 161 170; /* #A1A1AA Text Secondary */
+  
+  --card: 22 27 34; /* #161B22 Card BG */
+  --card-foreground: 229 231 235; /* #E5E7EB Text Primary */
+  
+  --popover: 22 27 34; /* #161B22 */
+  --popover-foreground: 229 231 235; /* #E5E7EB */
+  
+  --primary-foreground: 229 231 235; /* #E5E7EB */
+  --secondary-foreground: 255 255 255; /* #FFFFFF */
+  
+  --muted: 22 27 34; /* #161B22 */
+  --muted-foreground: 161 161 170; /* #A1A1AA */
+  
+  --destructive: 255 77 109; /* #FF4D6D */
+  --destructive-foreground: 255 255 255; /* #FFFFFF */
+  
+  --border: 45 55 72; /* #2D3748 */
+  --input: 45 55 72; /* #2D3748 */
+  --ring: 0 112 243; /* #0070F3 */
+  
+  --chart-1: 0 112 243; /* #0070F3 */
+  --chart-2: 79 70 229; /* #4F46E5 */
+  --chart-3: 124 58 237; /* #7C3AED */
+  --chart-4: 255 77 109; /* #FF4D6D */
+  --chart-5: 34 211 238; /* #22D3EE */
+  
+  --radius: 0.5rem
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-text;
+  }
+}
+
+/* Dark theme adjustments */
+@layer utilities {
+  .card {
+    @apply bg-card text-card-foreground;
+  }
+  
+  .text-muted {
+    @apply text-text-muted;
+  }
+}
+
+/* Add your other styles later */
+
+/* Force dark theme for all pages */
+body {
+  background-color: #0D1117;
+  color: #E5E7EB;
+}
+
+#root {
+  min-height: 100vh;
+  background-image: linear-gradient(to bottom, #0D1117, #161B22, rgba(13, 17, 23, 0.9));
+}
+
+/* Target specific routes */
+[data-route="/about"],
+[data-route="/pricing"] {
+  background-color: #0D1117;
+  background-image: linear-gradient(to bottom, #0D1117, #161B22, rgba(13, 17, 23, 0.9));
+  min-height: 100vh;
+  color: #E5E7EB;
+}
