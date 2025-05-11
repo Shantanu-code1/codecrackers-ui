@@ -644,14 +644,16 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
     ];
   }, [doubtsData, isLoading]);
 
-  // Calculate top categories dynamically
+  // Calculate top categories dynamically with better field detection
   const topCategories = React.useMemo(() => {
     if (isLoading || !doubtsData || doubtsData.length === 0) {
       return [];
     }
 
+    // Create a counter for all fields that might contain category information
     const categoryCounts = doubtsData.reduce((acc, doubt) => {
-      const category = doubt.topic || "Uncategorized";
+      // Try different fields that might contain category info, with priority order
+      const category = doubt.category || doubt.topic || "Uncategorized";
       acc[category] = (acc[category] || 0) + 1;
       return acc;
     }, {});
@@ -661,10 +663,28 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5); // Take top 5
       
-    const colors = ["#0070F3", "#8884d8", "#FF4D4F", "#52C41A", "#FAAD14"];
+    // Generate a deterministic color for each category name
+    const getColorForCategory = (name, index) => {
+      const colors = ["#0070F3", "#8884d8", "#FF4D4F", "#52C41A", "#FAAD14", "#722ED1", "#13C2C2", "#EB2F96"];
+      
+      // Hash the category name to get a consistent index
+      let hashCode = 0;
+      for (let i = 0; i < name.length; i++) {
+        hashCode = (hashCode << 5) - hashCode + name.charCodeAt(i);
+        hashCode |= 0; // Convert to 32bit integer
+      }
+      
+      // Use abs to ensure positive number, then mod by array length
+      const colorIndex = Math.abs(hashCode) % colors.length;
+      
+      // Or use index position as fallback
+      return colors[colorIndex] || colors[index % colors.length];
+    };
+    
     return sortedCategories.map((cat, index) => ({ 
         ...cat, 
-        color: colors[index % colors.length] 
+        color: getColorForCategory(cat.name, index),
+        percentage: Math.round((cat.count / doubtsData.length) * 100)
     }));
       
   }, [doubtsData, isLoading]);
@@ -678,7 +698,7 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
             <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
             Summary
           </CardTitle>
-            </CardHeader>
+        </CardHeader>
         <CardContent className="p-4">
           {isLoading ? (
             <div className="grid grid-cols-2 gap-4 animate-pulse">
@@ -699,7 +719,7 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
                   <div className="flex items-center mb-2">
                     <div className="w-8 h-8 rounded-full bg-[#0070F3]/10 flex items-center justify-center mr-2">
                       <stat.icon className="w-4 h-4 text-[#0070F3]" />
-                </div>
+                    </div>
                     <span className="text-sm text-[#A1A1AA]">{stat.label}</span>
                   </div>
                   <p className="text-2xl font-semibold text-[#E5E7EB]">{stat.value}</p>
@@ -707,17 +727,26 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
               ))}
             </div>
           )}
-                  </CardContent>
-                </Card>
+        </CardContent>
+      </Card>
 
-      {/* Top Categories Card */}
+      {/* Top Categories Card - Enhanced with animations and better visualization */}
       <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
         <CardHeader className="pb-3 border-b border-[#30363D]/50">
-          <CardTitle className="text-xl font-semibold flex items-center">
-            <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
-            Top Categories
-          </CardTitle>
-                  </CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-xl font-semibold flex items-center">
+              <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
+              Top Categories
+            </CardTitle>
+            <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D]">
+              {topCategories.length} of {Object.keys(doubtsData.reduce((acc, d) => {
+                const category = d.category || d.topic || "Uncategorized";
+                acc[category] = true;
+                return acc;
+              }, {})).length}
+            </Badge>
+          </div>
+        </CardHeader>
         <CardContent className="p-4">
           {isLoading ? (
             <div className="space-y-4 animate-pulse">
@@ -736,32 +765,58 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
             </div>
           ) : topCategories.length > 0 ? (
             <div className="space-y-4">
-              {topCategories.map((category, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: category.color }} />
-                    <span className="text-[#E5E7EB]">{category.name}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-[#A1A1AA] text-sm mr-2">{category.count}</span>
-                    <div className="w-16 h-1.5 bg-[#0D1117] rounded-full">
-                      <div 
-                        className="h-full rounded-full" 
-                        style={{ 
-                          width: `${(category.count / (topCategories[0].count || 1)) * 100}%`, 
-                          backgroundColor: category.color 
-                        }} 
-                      />
+              <AnimatePresence>
+                {topCategories.map((category, index) => (
+                  <motion.div 
+                    key={category.name}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                    className="flex flex-col"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: category.color }} />
+                        <span className="text-[#E5E7EB] font-medium">{category.name}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-[#A1A1AA] text-sm mr-2">{category.count}</span>
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs bg-[#0D1117] border-none text-[#A1A1AA]"
+                        >
+                          {category.percentage}%
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                    <motion.div 
+                      className="w-full h-1.5 bg-[#0D1117] rounded-full overflow-hidden"
+                      initial={{ width: "0%" }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <motion.div 
+                        className="h-full rounded-full" 
+                        style={{ backgroundColor: category.color }}
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${(category.count / (topCategories[0].count || 1)) * 100}%` }}
+                        transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+                      />
+                    </motion.div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           ) : (
-            <p className="text-center text-[#A1A1AA] py-4">No category data available.</p>
+            <div className="text-center text-[#A1A1AA] py-4 flex flex-col items-center">
+              <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+              <p>No category data available</p>
+              <p className="text-xs mt-1">Submit questions to see categories</p>
+            </div>
           )}
-                  </CardContent>
-                </Card>
+        </CardContent>
+      </Card>
 
       {/* Recent Activity Card */}
       <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
