@@ -104,7 +104,9 @@ const EnhancedDoubtPage = () => {
     (doubt) =>
       (doubt.title?.toLowerCase() ?? '').includes(searchQuery.toLowerCase()) &&
       (selectedCategory === "All Categories" || doubt.category === selectedCategory) &&
-      (selectedStatus === "All" || doubt.status === selectedStatus) &&
+      (selectedStatus === "All" || 
+       (selectedStatus === "Pending" && (!doubt.isSolved || doubt.isSolved === "PENDING")) ||
+       (selectedStatus === "Solved" && doubt.isSolved && doubt.isSolved !== "PENDING")) &&
       true
   )
 
