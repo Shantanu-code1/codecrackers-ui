@@ -185,6 +185,11 @@ export default function LearningStreakCalendar() {
                 const hasStatus = status !== undefined;
                 const isToday = day === new Date().getDate() && currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear();
                 
+                // Check if the date is in the future
+                const currentDateObj = new Date();
+                const cellDate = new Date(dateString);
+                const isFutureDate = cellDate > new Date(currentDateObj.setHours(0, 0, 0, 0));
+                
                 return (
                   <TooltipProvider key={day}>
                     <Tooltip>
@@ -193,34 +198,25 @@ export default function LearningStreakCalendar() {
                           className={`h-9 rounded-md flex items-center justify-center cursor-pointer text-sm relative ${
                             isToday ? "ring-2 ring-[#0070F3] ring-opacity-70" : ""
                           } ${
-                            // If API data is available and status is true (has activity), show green background
-                            hasStatus && status
-                              ? "bg-gradient-to-br from-[#0D4522] to-[#0A3A1C] border border-[#2E6B38] hover:bg-[#2E6B38] text-green-200"
-                              // If API data is available and status is false (no activity), show darker background with red tint
-                              : hasStatus && !status
-                              ? "bg-gradient-to-br from-[#231717] to-[#1A1212] border border-[#3D3030] hover:bg-[#321C1C] text-red-200"
-                              // If no API data, fallback to the original styling
-                              : activity 
-                                ? "bg-gradient-to-br from-[#0D1117] to-[#131b29] border border-[#30363D] hover:bg-[#30363D]" 
-                                : "bg-[#0D1117]/50 hover:bg-[#0D1117] border border-[#30363D]/30"
+                            // If it's a future date, use neutral styling regardless of status
+                            isFutureDate
+                              ? "bg-[#0D1117]/50 hover:bg-[#0D1117] border border-[#30363D]/30 text-[#8B949E]"
+                              : // For past/current dates, use the status colors
+                                hasStatus && status
+                                ? "bg-gradient-to-br from-[#0D4522] to-[#0A3A1C] border border-[#2E6B38] hover:bg-[#2E6B38] text-green-200"
+                                : hasStatus && !status
+                                ? "bg-gradient-to-br from-[#231717] to-[#1A1212] border border-[#3D3030] hover:bg-[#321C1C] text-red-200"
+                                : activity 
+                                  ? "bg-gradient-to-br from-[#0D1117] to-[#131b29] border border-[#30363D] hover:bg-[#30363D]" 
+                                  : "bg-[#0D1117]/50 hover:bg-[#0D1117] border border-[#30363D]/30"
                           } ${selectedDay === dateString ? "ring-2 ring-[#0070F3] ring-opacity-70" : ""}`}
-                          whileHover={{ scale: 1.08, boxShadow: (hasStatus && status) || activity ? "0 0 10px rgba(0,112,243,0.15)" : "none" }}
+                          whileHover={{ scale: 1.08, boxShadow: !isFutureDate && ((hasStatus && status) || activity) ? "0 0 10px rgba(0,112,243,0.15)" : "none" }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => setSelectedDay(dateString)}
+                          onClick={() => !isFutureDate && setSelectedDay(dateString)}
                         >
                           {day}
-                          {/* Show green circle for days with activity from API */}
-                          {/* {hasStatus && status && (
-                            <motion.div 
-                              initial={{ scale: 0.8 }}
-                              animate={{ scale: [0.8, 1.2, 0.8] }} 
-                              transition={{ repeat: Infinity, duration: 2 }}
-                              className="absolute bottom-1 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(46,200,94,0.7)]" 
-                            />
-                          )} */}
-                          {/* Remove red dot, keeping only red background */}
-                          {/* Fallback to blue dot for activity from mock data */}
-                          {!hasStatus && activity && (
+                          {/* Only show activity indicator for past/current dates */}
+                          {!isFutureDate && !hasStatus && activity && (
                             <motion.div 
                               initial={{ scale: 0.8 }}
                               animate={{ scale: [0.8, 1.2, 0.8] }} 
@@ -235,7 +231,9 @@ export default function LearningStreakCalendar() {
                         align="center"
                         className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] p-2 shadow-xl"
                       >
-                        {hasStatus ? (
+                        {isFutureDate ? (
+                          <span className="text-xs">Future date</span>
+                        ) : hasStatus ? (
                           <div className="py-1">
                             {status ? (
                               <p className="font-medium text-xs text-green-400">Completed learning activity</p>
