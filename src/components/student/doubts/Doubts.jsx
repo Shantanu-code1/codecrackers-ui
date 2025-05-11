@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Star, Book, Clock, MessageCircle, TrendingUp, Filter, ArrowUpRight, CheckCircle, AlertCircle, Sparkles, MoreHorizontal, ChevronDown, Bookmark, Code, UserCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -52,6 +52,30 @@ const analyticsData = [
   { name: "Jun", doubts: 50, solutions: 48 },
 ]
 
+function formatRelativeTime(dateString) {
+  const date = dateString instanceof Date ? dateString : new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 30) {
+    return date.toLocaleDateString();
+  } else if (diffDays > 1) {
+    return `${diffDays} days ago`;
+  } else if (diffDays === 1) {
+    return "Yesterday";
+  } else if (diffHours > 1) {
+    return `${diffHours} hours ago`;
+  } else if (diffMinutes > 1) {
+    return `${diffMinutes} minutes ago`;
+  } else {
+    return "Just now";
+  }
+}
+
 const EnhancedDoubtPage = () => {
   const [selectedTab, setSelectedTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -75,12 +99,32 @@ const EnhancedDoubtPage = () => {
     tags: []
   })
   const [formErrors, setFormErrors] = useState({})
+  const [recentActivities, setRecentActivities] = useState([])
   const { submitDoubt, isSubmitting, isSuccess } = useSubmitDoubt()
   const { doubtsData, isLoading, isError, error, refetch } = useFetchDoubts()
+
+  // Function to add a new activity
+  const addActivity = useCallback((type, title = "", detail = "") => {
+    const newActivity = {
+      id: Date.now(),
+      type,
+      title,
+      detail,
+      timestamp: new Date(),
+    }
+    setRecentActivities(prev => [newActivity, ...prev.slice(0, 9)]) // Keep only 10 most recent activities
+  }, [])
 
   useEffect(() => {
     // Clear form and close modal when submission is successful
     if (isSuccess) {
+      // Add activity for successful submission
+      addActivity(
+        "question_asked", 
+        newQuestion.title,
+        `You submitted a new question in ${newQuestion.category}`
+      )
+      
       setNewQuestion({
         title: "",
         category: "",
@@ -94,7 +138,26 @@ const EnhancedDoubtPage = () => {
       // Manually refetch the doubts after successful submission
       refetch()
     }
-  }, [isSuccess, refetch])
+  }, [isSuccess, refetch, addActivity, newQuestion.title, newQuestion.category])
+
+  // Load recent activities from localStorage on initial load
+  useEffect(() => {
+    const savedActivities = localStorage.getItem('recentActivities')
+    if (savedActivities) {
+      try {
+        setRecentActivities(JSON.parse(savedActivities))
+      } catch (e) {
+        console.error('Failed to parse saved activities:', e)
+      }
+    }
+  }, [])
+  
+  // Save activities to localStorage when they change
+  useEffect(() => {
+    if (recentActivities.length > 0) {
+      localStorage.setItem('recentActivities', JSON.stringify(recentActivities))
+    }
+  }, [recentActivities])
 
   const togglePreview = () => {
     setPreviewMode(!previewMode)
@@ -257,7 +320,7 @@ const EnhancedDoubtPage = () => {
                         transition={{ duration: 0.2 }}
                       layout
                       >
-                        <DoubtCard doubt={doubt} />
+                        <DoubtCard doubt={doubt} onAddActivity={addActivity} />
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -283,9 +346,9 @@ const EnhancedDoubtPage = () => {
           
           {/* Right panel - Stats */}
           <div className="md:col-span-1">
-            <DoubtsStats doubtsData={doubtsData} isLoading={isLoading} />
-                  </div>
-                </div>
+            <DoubtsStats doubtsData={doubtsData} isLoading={isLoading} recentActivities={recentActivities} />
+          </div>
+        </div>
       </div>
 
       <Dialog open={isAskModalOpen} onOpenChange={setIsAskModalOpen}>
@@ -461,7 +524,7 @@ const EnhancedDoubtPage = () => {
   )
 }
 
-function DoubtCard({ doubt }) {
+function DoubtCard({ doubt, onAddActivity }) {
   // Adjust to match the actual API response structure
   const safeTags = Array.isArray(doubt.tagsList) ? doubt.tagsList : [];
   const safeDate = doubt.timeSubmitted ? new Date(doubt.timeSubmitted).toLocaleDateString() : "Date unknown";
@@ -470,6 +533,18 @@ function DoubtCard({ doubt }) {
   const safeTitle = doubt.title || "Untitled Doubt";
   const safeTopic = doubt.topic || "Uncategorized";
   const safeStatus = doubt.isSolved || "PENDING";
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddActivity("doubt_saved", safeTitle, `You saved a doubt for later: ${safeTitle}`);
+  };
+
+  const handleReply = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddActivity("question_reply", safeTitle, `You started a reply to: ${safeTitle}`);
+  };
 
   return (
     <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
@@ -510,11 +585,21 @@ function DoubtCard({ doubt }) {
         
         <div className="flex justify-between items-center pt-2 border-t border-[#30363D]/50">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-[#A1A1AA] hover:text-[#E5E7EB]">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-[#A1A1AA] hover:text-[#E5E7EB]"
+              onClick={handleSave}
+            >
               <Star className="w-4 h-4 mr-1" />
               Save
             </Button>
-            <Button variant="ghost" size="sm" className="text-[#A1A1AA] hover:text-[#E5E7EB]">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-[#A1A1AA] hover:text-[#E5E7EB]"
+              onClick={handleReply}
+            >
               <MessageCircle className="w-4 h-4 mr-1" />
               Reply
             </Button>
@@ -534,7 +619,7 @@ function DoubtCard({ doubt }) {
   );
 }
 
-function DoubtsStats({ doubtsData, isLoading }) {
+function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
   // Calculate dynamic stats only when not loading and data is available
   const stats = React.useMemo(() => {
     if (isLoading || !doubtsData || doubtsData.length === 0) {
@@ -678,40 +763,57 @@ function DoubtsStats({ doubtsData, isLoading }) {
                   </CardContent>
                 </Card>
 
-      {/* Recent Activity Card (Remains Static for now) */}
+      {/* Recent Activity Card */}
       <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
         <CardHeader className="pb-3 border-b border-[#30363D]/50">
           <CardTitle className="text-xl font-semibold flex items-center">
             <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
             Recent Activity
           </CardTitle>
-                  </CardHeader>
+        </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-[#30363D]">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="p-4 flex items-start">
-                <div className="w-8 h-8 rounded-full bg-[#0D1117] flex items-center justify-center mr-3">
-                  {i === 1 ? (
-                    <MessageCircle className="w-4 h-4 text-[#0070F3]" />
-                  ) : i === 2 ? (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <Star className="w-4 h-4 text-amber-500" />
-                  )}
+            {recentActivities.length > 0 ? (
+              recentActivities.map((activity) => (
+                <div key={activity.id} className="p-4 flex items-start">
+                  <div className="w-8 h-8 rounded-full bg-[#0D1117] flex items-center justify-center mr-3">
+                    {activity.type === "question_asked" ? (
+                      <MessageCircle className="w-4 h-4 text-[#0070F3]" />
+                    ) : activity.type === "question_answered" ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : activity.type === "doubt_saved" ? (
+                      <Star className="w-4 h-4 text-amber-500" />
+                    ) : activity.type === "question_reply" ? (
+                      <MessageCircle className="w-4 h-4 text-purple-500" />
+                    ) : (
+                      <Clock className="w-4 h-4 text-[#A1A1AA]" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#E5E7EB]">
+                      {activity.title ? 
+                        `${activity.type === "question_asked" ? "New question" : 
+                          activity.type === "question_answered" ? "Question answered" : 
+                          activity.type === "doubt_saved" ? "Saved doubt" :
+                          activity.type === "question_reply" ? "Started a reply" : 
+                          "Activity"}: ${activity.title}` 
+                        : activity.detail}
+                    </p>
+                    <p className="text-xs text-[#A1A1AA] mt-1">
+                      {formatRelativeTime(activity.timestamp)}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-[#E5E7EB]">
-                    {i === 1 ? "You asked a new question" : i === 2 ? "Your question was answered" : "You saved a doubt for later"}
-                  </p>
-                  <p className="text-xs text-[#A1A1AA] mt-1">
-                    {i === 1 ? "2 hours ago" : i === 2 ? "1 day ago" : "3 days ago"}
-                  </p>
-                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-[#A1A1AA]">
+                <p>No recent activity to show</p>
+                <p className="text-xs mt-1">Your activities will appear here</p>
               </div>
-            ))}
-              </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
