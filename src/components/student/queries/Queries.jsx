@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Star, MessageCircle, ThumbsUp, ThumbsDown, Clock, Filter, Award, User, Users, ArrowLeft } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -15,132 +15,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import Header from "../header/Header"
 import { Textarea } from "@/components/ui/textarea"
+import { submitQuery, getQueries, getQueryAnswers, submitAnswer } from "@/zustand/student/action"
+import { toast } from "react-toastify"
 
-const mockQueries = [
-  {
-    id: 1,
-    title: "How do I implement a Redux store in a React application?",
-    body: "I'm new to Redux and I'm trying to set up a store in my React app. Can someone provide a simple example of how to properly configure Redux with React?",
-    codeSnippet: `
-import { createStore } from 'redux';
-
-// What should I put here?
-const rootReducer = ???
-
-const store = createStore(rootReducer);
-    `,
-    author: {
-      id: 1,
-      name: "Jamie Miller",
-      avatar: "/placeholder.svg",
-      role: "Student",
-    },
-    category: "React",
-    tags: ["react", "redux", "javascript"],
-    date: "2025-03-10",
-    views: 128,
-    answers: 3,
-    votes: 15,
-    status: "Open",
-  },
-  {
-    id: 2,
-    title: "Understanding async/await in JavaScript",
-    body: "I'm confused about how async/await works in JavaScript. Can someone explain the concept with some practical examples?",
-    codeSnippet: `
-async function fetchData() {
-  const response = await fetch('https://api.example.com/data');
-  const data = await response.json();
-  return data;
-}
-
-// How do I properly call this function?
-    `,
-    author: {
-      id: 2,
-      name: "Alex Wong",
-      avatar: "/placeholder.svg",
-      role: "Student",
-    },
-    category: "JavaScript",
-    tags: ["javascript", "async", "promises"],
-    date: "2025-03-08",
-    views: 210,
-    answers: 5,
-    votes: 28,
-    status: "Answered",
-  },
-  {
-    id: 3,
-    title: "Proper way to handle API errors in React",
-    body: "What is the recommended approach to handle API errors in a React application? I want to display user-friendly error messages.",
-    codeSnippet: `
-function fetchUserData() {
-  fetch('/api/user')
-    .then(response => {
-      if (!response.ok) {
-        // What's the best way to handle this?
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      // Handle data
-    })
-    .catch(error => {
-      // Show error to user somehow?
-      console.error('Error:', error);
-    });
-}
-    `,
-    author: {
-      id: 3,
-      name: "Sarah Johnson",
-      avatar: "/placeholder.svg",
-      role: "Student",
-    },
-    category: "React",
-    tags: ["react", "api", "error-handling"],
-    date: "2025-03-05",
-    views: 156,
-    answers: 4,
-    votes: 19,
-    status: "Closed",
-  },
-  {
-    id: 4,
-    title: "How to optimize React component performance?",
-    body: "My React application is getting slow as it grows. What techniques can I use to optimize the performance of my components?",
-    codeSnippet: `
-// Current implementation
-function MyComponent({ data }) {
-  const processedData = expensiveCalculation(data);
-  
-  return (
-    <div>
-      {processedData.map(item => (
-        <Item key={item.id} item={item} />
-      ))}
-    </div>
-  );
-}
-    `,
-    author: {
-      id: 4,
-      name: "David Chen",
-      avatar: "/placeholder.svg",
-      role: "Student",
-    },
-    category: "React",
-    tags: ["react", "performance", "optimization"],
-    date: "2025-03-02",
-    views: 189,
-    answers: 6,
-    votes: 32,
-    status: "Answered",
-  },
-]
-
+// Example mock data for answers, can be replaced with real API data later
 const mockAnswers = [
   {
     id: 1,
@@ -200,7 +78,78 @@ const store = createStore(rootReducer);`,
   }
 ];
 
+// Expected API response format for queries
+const apiResponseFormat = {
+  success: true,
+  data: {
+    queries: [
+      {
+        id: 1,
+        title: "How do I implement a Redux store in a React application?",
+        body: "I'm new to Redux and I'm trying to set up a store in my React app. Can someone provide a simple example of how to properly configure Redux with React?",
+        codeSnippet: "import { createStore } from 'redux';\n\n// What should I put here?\nconst rootReducer = ???\n\nconst store = createStore(rootReducer);",
+        author: {
+          id: 1,
+          name: "Jamie Miller",
+          avatar: "/placeholder.svg",
+          role: "Student",
+        },
+        category: "React",
+        tags: ["react", "redux", "javascript"],
+        date: "2025-03-10",
+        views: 128,
+        answers: 3,
+        votes: 15,
+        status: "Open",
+      },
+      // Additional query objects...
+    ],
+    total: 25,
+    page: 1,
+    limit: 10
+  }
+};
+
+// Expected API response format for answers
+const apiAnswersResponseFormat = {
+  success: true,
+  data: {
+    answers: [
+      {
+        id: 1,
+        queryId: 1,
+        author: {
+          id: 2,
+          name: "Sophie Chen",
+          avatar: "/placeholder.svg",
+          role: "Teacher"
+        },
+        content: "In Redux, the store is the central piece that holds your application state. Here's how you can set it up correctly:",
+        codeSnippet: "// Define your reducers\nconst counterReducer = (state = 0, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return state + 1;\n    case 'DECREMENT':\n      return state - 1;\n    default:\n      return state;\n  }\n};\n\n// Combine reducers if you have multiple\nimport { combineReducers, createStore } from 'redux';\nconst rootReducer = combineReducers({\n  counter: counterReducer,\n  // other reducers...\n});\n\n// Create the store\nconst store = createStore(rootReducer);",
+        date: "2025-03-10",
+        votes: {
+          up: 12,
+          down: 2
+        },
+        isVerified: true
+      },
+      // Additional answer objects...
+    ]
+  }
+};
+
 const QueriesPage = () => {
+  // State for real queries data
+  const [queries, setQueries] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  
+  // State for answers
+  const [answers, setAnswers] = useState([])
+  const [loadingAnswers, setLoadingAnswers] = useState(false)
+  const [answersError, setAnswersError] = useState(null)
+  
+  // Other state
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [selectedStatus, setSelectedStatus] = useState("All")
@@ -224,24 +173,109 @@ const QueriesPage = () => {
   const [showUnansweredOnly, setShowUnansweredOnly] = useState(false)
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(false)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [showNewQueryForm, setShowNewQueryForm] = useState(false)
+
+  // Fetch queries on component mount
+  useEffect(() => {
+    fetchQueries();
+  }, []);
+
+  // Function to fetch queries
+  const fetchQueries = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getQueries();
+      console.log("fetchQueries data:", response);
+      
+      // Check if the response has the expected structure
+      if (!response || !response.success || !response.data || !response.data.queries) {
+        throw new Error("Invalid response format from API");
+      }
+      
+      const data = response.data.queries;
+      
+      // Filter out any items that might be doubts instead of queries
+      const queriesOnly = data.filter(item => {
+        // Check if the item is a query and not a doubt
+        // This depends on how your API distinguishes between queries and doubts
+        // Possible fields to check: type, isDoubt, etc.
+        return !item.isDoubt && item.type !== 'doubt';
+      });
+      
+      // Transform API data to match expected format
+      const formattedQueries = queriesOnly.map(item => ({
+        id: item.id,
+        title: item.title,
+        body: item.body, // API now directly provides body field
+        codeSnippet: item.codeSnippet,
+        author: item.author || {
+          id: 1,
+          name: "You",
+          avatar: "/placeholder.svg",
+          role: "Student",
+        },
+        category: item.category, // API now directly provides category field
+        tags: item.tags || [], // API provides tags directly
+        date: new Date(item.date).toISOString().split('T')[0], // Format the date
+        views: item.views || 0,
+        answers: item.answers || 0,
+        votes: item.votes || 0,
+        status: item.status || "Open", // API provides status directly
+      }));
+      
+      setQueries(formattedQueries);
+    } catch (error) {
+      console.error("Error fetching queries:", error);
+      setError("Failed to fetch queries. Please try again.");
+      toast.error("Failed to fetch queries. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Get all unique tags from queries for the filter
-  const allTags = [...new Set(mockQueries.flatMap(query => query.tags))]
+  const allTags = [...new Set(queries.flatMap(query => query.tags))]
   
   // Get all unique categories for the filter
-  const allCategories = ["All", ...new Set(mockQueries.map(query => query.category))]
+  const allCategories = ["All", ...new Set(queries.map(query => query.category))]
 
-  const handleQueryClick = (query) => {
+  const handleQueryClick = async (query) => {
     console.log("Clicking query:", query.id);
     // Force a re-render with a fresh state object to ensure React detects the change
     setActiveQuery({...query});
+
+    // Fetch answers for this query
+    setLoadingAnswers(true);
+    setAnswersError(null);
+    setAnswers([]);
+    
+    try {
+      const response = await getQueryAnswers(query.id);
+      console.log("Fetched answers:", response);
+      
+      // Process the answers
+      if (response && response.success && response.data && response.data.answers) {
+        setAnswers(response.data.answers);
+      } else {
+        // If the response format is different, try to handle it
+        const answersData = response.answers || response.data || [];
+        setAnswers(Array.isArray(answersData) ? answersData : []);
+      }
+    } catch (error) {
+      console.error("Error fetching answers:", error);
+      setAnswersError("Failed to load answers. Please try again.");
+      toast.error("Failed to load answers. Please try again.");
+    } finally {
+      setLoadingAnswers(false);
+    }
   }
 
   const handleBackToList = () => {
     setActiveQuery(null)
   }
 
-  const filteredQueries = mockQueries.filter((query) => {
+  const filteredQueries = queries.filter((query) => {
     if (!query.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !query.body.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false
@@ -289,27 +323,117 @@ const QueriesPage = () => {
   })
 
   const getAnswersForQuery = (queryId) => {
-    // Check if mockAnswers exists first
-    if (!mockAnswers || !Array.isArray(mockAnswers)) {
-      console.error("mockAnswers is undefined or not an array");
-      return [];
-    }
+    // Use the real answers from the state
+    let queryAnswers = answers;
     
-    console.log("Looking for answers for query ID:", queryId);
-    let answers = mockAnswers.filter((answer) => answer.queryId === queryId);
-    console.log("Found answers:", answers);
-    
+    // Filter by teacher if needed
     if (showTeacherAnswersOnly) {
-      answers = answers.filter((answer) => answer.author.role === "Teacher");
+      queryAnswers = queryAnswers.filter((answer) => answer.author.role === "Teacher");
     }
     
-    return answers;
+    return queryAnswers;
   }
 
-  const handleSubmitQuery = (e) => {
+  const handleSubmitQuery = async (e) => {
     e.preventDefault()
-    // In a real app, we would submit to the backend
-    alert("Query submitted! (This is a mock implementation)")
+    
+    // Create the payload in the required format
+    const payload = {
+      title: newQuery.title,
+      body: newQuery.body,
+      codeSnippet: newQuery.codeSnippet,
+      category: newQuery.category,
+      tags: newQuery.tags,
+      type: 'query', // Explicitly mark as a query
+      isDoubt: false // Make sure it's not a doubt
+    }
+    
+    console.log("Submitting payload:", payload)
+    
+    try {
+      // Submit the query using the API function
+      const response = await submitQuery(payload);
+      console.log("handleSubmitQuery Response:", response);
+      
+      // Add the new query to the list
+      if (response && response.data) {
+        const newQueryData = response.data;
+        
+        // Check if the response is actually a query and not a doubt
+        if (newQueryData.isDoubt || newQueryData.type === 'doubt') {
+          console.warn("Received a doubt instead of a query in the response");
+          // Don't add it to the queries list since it's a doubt
+          toast.success("Submission successful, but it was processed as a doubt not a query.");
+          setNewQuery({
+            title: "",
+            body: "",
+            codeSnippet: "",
+            category: "",
+            tags: [],
+          });
+          setShowNewQueryForm(false);
+          return;
+        }
+        
+        // Get user data from localStorage for author information
+        let userData = { name: "You" };
+        try {
+          const userDataStr = localStorage.getItem('userData');
+          if (userDataStr) {
+            userData = JSON.parse(userDataStr);
+          }
+        } catch (e) {
+          console.error("Error parsing user data:", e);
+        }
+        
+        // Format the new query to match the expected format
+        const formattedQuery = {
+          id: newQueryData.id,
+          title: newQueryData.title,
+          body: newQueryData.description || newQueryData.body || "", 
+          codeSnippet: newQueryData.codeSnippet,
+          author: {
+            id: userData.id || 1,
+            name: userData.name || "You",
+            avatar: "/placeholder.svg",
+            role: "Student",
+          },
+          category: newQueryData.topic || newQueryData.category || "",
+          tags: newQueryData.tagsList || newQueryData.tags || [],
+          date: new Date(newQueryData.timeSubmitted || newQueryData.date || Date.now()).toISOString().split('T')[0],
+          views: 0, 
+          answers: 0,
+          votes: 0,
+          status: newQueryData.isSolved === "PENDING" || !newQueryData.isSolved ? "Open" : "Solved",
+          // Add fields to keep track that this is a query, not a doubt
+          type: 'query',
+          isDoubt: false
+        };
+        
+        // Add the new query to the top of the list
+        setQueries(prevQueries => [formattedQuery, ...prevQueries]);
+      }
+      
+      toast.success("Query submitted successfully!");
+      
+      // Reset form and hide it on success
+      setNewQuery({
+        title: "",
+        body: "",
+        codeSnippet: "",
+        category: "",
+        tags: [],
+      });
+      setShowNewQueryForm(false);
+      
+    } catch (error) {
+      console.error("Error submitting query:", error);
+      toast.error(error.response?.data?.message || "Failed to submit query. Please try again.");
+    }
+  }
+
+  const handleCancelNewQuery = () => {
+    setShowNewQueryForm(false)
     setNewQuery({
       title: "",
       body: "",
@@ -319,37 +443,74 @@ const QueriesPage = () => {
     })
   }
 
-  const handleSubmitAnswer = (e) => {
+  const handleSubmitAnswer = async (e) => {
     e.preventDefault()
-    // In a real app, we would submit to the backend
-    // Here's what would be sent:
-    const answerToSubmit = {
-      ...newAnswer,
-      queryId: activeQuery.id,
-      author: {
-        id: 999, // In a real app, this would be the current user's ID
-        name: "Current User",
-        avatar: "/placeholder.svg",
-        role: "Student"
-      },
-      date: new Date().toISOString().split('T')[0], // Today's date
-      votes: { up: 0, down: 0 },
-      isVerified: false
+    
+    if (!activeQuery || !activeQuery.id) {
+      toast.error("Cannot submit answer: No active query selected");
+      return;
+    }
+    
+    // Prepare answer data
+    const answerData = {
+      content: newAnswer.content,
+      codeSnippet: newAnswer.codeSnippet
     };
     
-    console.log("Submitting answer:", answerToSubmit);
+    console.log("Submitting answer:", answerData);
     
-    // This would be a fetch/axios call in a real app
-    alert("Answer submitted! (This is a mock implementation)");
-    
-    // For demonstration, we could add it to the mockAnswers array
-    // mockAnswers.push({...answerToSubmit, id: mockAnswers.length + 1});
-    
-    // Reset the form
-    setNewAnswer({
-      content: "",
-      codeSnippet: "",
-    });
+    try {
+      // Submit the answer using the API function
+      const response = await submitAnswer(activeQuery.id, answerData);
+      console.log("Answer submission response:", response);
+      
+      // Add the new answer to the list if successful
+      if (response && response.data) {
+        const newAnswerData = response.data;
+        
+        // Get user data from localStorage for author information
+        let userData = { name: "You" };
+        try {
+          const userDataStr = localStorage.getItem('userData');
+          if (userDataStr) {
+            userData = JSON.parse(userDataStr);
+          }
+        } catch (e) {
+          console.error("Error parsing user data:", e);
+        }
+        
+        // Format the answer to match expected format
+        const formattedAnswer = {
+          id: newAnswerData.id || Date.now(), // Use the server ID or generate one
+          queryId: activeQuery.id,
+          content: newAnswerData.content || newAnswer.content,
+          codeSnippet: newAnswerData.codeSnippet || newAnswer.codeSnippet,
+          date: newAnswerData.date || new Date().toISOString(),
+          author: newAnswerData.author || {
+            id: userData.id || 999,
+            name: userData.name || "You",
+            avatar: "/placeholder.svg",
+            role: "Student"
+          },
+          votes: newAnswerData.votes || { up: 0, down: 0 },
+          isVerified: newAnswerData.isVerified || false
+        };
+        
+        // Add the new answer to the list
+        setAnswers(prevAnswers => [...prevAnswers, formattedAnswer]);
+      }
+      
+      toast.success("Answer submitted successfully!");
+      
+      // Reset the form
+      setNewAnswer({
+        content: "",
+        codeSnippet: "",
+      });
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      toast.error(error.response?.data?.message || "Failed to submit answer. Please try again.");
+    }
   }
 
   return (
@@ -360,12 +521,147 @@ const QueriesPage = () => {
         <div className="absolute bottom-0 left-0 w-1/4 h-1/3 bg-gradient-to-t from-secondary/5 to-transparent rounded-full blur-[150px] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-text mb-2">Community Queries</h1>
-            <p className="text-text-muted">Explore and answer questions from the community</p>
+          <div className="mb-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-text mb-2">Community Queries</h1>
+              <p className="text-text-muted">Explore and answer questions from the community</p>
+            </div>
+            {!activeQuery && !showNewQueryForm && (
+              <Button 
+                className="bg-secondary hover:bg-secondary/90 text-white"
+                onClick={() => setShowNewQueryForm(true)}
+              >
+                Ask a Question
+              </Button>
+            )}
           </div>
           
-          {activeQuery ? (
+          {showNewQueryForm ? (
+            <Card className="bg-card border-border shadow-lg mb-6">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-xl text-text">Ask a New Question</CardTitle>
+                <CardDescription className="text-text-muted">
+                  Be specific and provide details to get better answers
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <form onSubmit={handleSubmitQuery}>
+                  <div className="mb-4">
+                    <Label htmlFor="query-title" className="text-text-muted mb-2 block">
+                      Title
+                    </Label>
+                    <Input 
+                      id="query-title"
+                      value={newQuery.title}
+                      onChange={(e) => setNewQuery({...newQuery, title: e.target.value})}
+                      placeholder="What's your question? Be specific."
+                      className="bg-muted border-border text-text"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <Label htmlFor="query-body" className="text-text-muted mb-2 block">
+                      Description
+                    </Label>
+                    <Textarea 
+                      id="query-body"
+                      value={newQuery.body}
+                      onChange={(e) => setNewQuery({...newQuery, body: e.target.value})}
+                      placeholder="Provide detailed context about your question..."
+                      className="bg-muted border-border text-text min-h-[150px]"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <Label htmlFor="query-code" className="text-text-muted mb-2 block">
+                      Code Snippet (optional)
+                    </Label>
+                    <Textarea 
+                      id="query-code"
+                      value={newQuery.codeSnippet}
+                      onChange={(e) => setNewQuery({...newQuery, codeSnippet: e.target.value})}
+                      placeholder="Add your code here if applicable..."
+                      className="bg-muted border-border text-text font-mono min-h-[100px]"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <Label htmlFor="query-category" className="text-text-muted mb-2 block">
+                        Category
+                      </Label>
+                      <Select 
+                        value={newQuery.category}
+                        onValueChange={(value) => setNewQuery({...newQuery, category: value})}
+                      >
+                        <SelectTrigger className="bg-muted border-border text-text">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card border-border text-text">
+                          <SelectItem value="JavaScript">JavaScript</SelectItem>
+                          <SelectItem value="React">React</SelectItem>
+                          <SelectItem value="Node.js">Node.js</SelectItem>
+                          <SelectItem value="CSS">CSS</SelectItem>
+                          <SelectItem value="HTML">HTML</SelectItem>
+                          <SelectItem value="TypeScript">TypeScript</SelectItem>
+                          <SelectItem value="Python">Python</SelectItem>
+                          <SelectItem value="Java">Java</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-text-muted mb-2 block">
+                        Tags
+                      </Label>
+                      <MultiSelect
+                        options={[
+                          { value: 'react', label: 'React' },
+                          { value: 'javascript', label: 'JavaScript' },
+                          { value: 'redux', label: 'Redux' },
+                          { value: 'api', label: 'API' },
+                          { value: 'async', label: 'Async' },
+                          { value: 'promises', label: 'Promises' },
+                          { value: 'error-handling', label: 'Error Handling' },
+                          { value: 'performance', label: 'Performance' },
+                          { value: 'optimization', label: 'Optimization' },
+                          { value: 'typescript', label: 'TypeScript' },
+                        ]}
+                        selected={newQuery.tags.map(tag => ({ value: tag, label: tag }))}
+                        onChange={(selected) => 
+                          setNewQuery({
+                            ...newQuery, 
+                            tags: selected.map(item => item.value)
+                          })
+                        }
+                        className="bg-muted border-border text-text"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-4 mt-6">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCancelNewQuery}
+                      className="border-border text-text"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="bg-secondary hover:bg-secondary/90 text-white"
+                    >
+                      Post Question
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          ) : activeQuery ? (
             <div>
               <Button 
                 variant="ghost" 
@@ -428,7 +724,8 @@ const QueriesPage = () => {
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold text-text">
-                    {activeQuery.answers} {activeQuery.answers === 1 ? 'Answer' : 'Answers'}
+                    {loadingAnswers ? "Loading Answers..." : 
+                     `${answers.length} ${answers.length === 1 ? 'Answer' : 'Answers'}`}
                   </h3>
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center">
@@ -457,46 +754,81 @@ const QueriesPage = () => {
                   </div>
                 </div>
                 
-                {getAnswersForQuery(activeQuery.id).map((answer) => (
-                  <Card key={answer.id} className="bg-card border-border shadow-md mb-4">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-start">
-                          <Avatar className="h-10 w-10 mr-3">
-                            <AvatarImage src={answer.author.avatar} />
-                            <AvatarFallback className="bg-muted text-text-muted">
-                              {answer.author.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center">
-                              <span className="text-text font-medium mr-2">{answer.author.name}</span>
-                              {answer.author.role === "Teacher" && (
-                                <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/30">
-                                  Teacher
-                                </Badge>
-                              )}
-                              {answer.isVerified && (
-                                <Badge className="ml-2 bg-green-500/10 text-green-500 border-green-500/30">
-                                  Verified Answer
-                                </Badge>
-                              )}
+                {loadingAnswers ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
+                  </div>
+                ) : answersError ? (
+                  <div className="text-center py-8">
+                    <p className="text-red-500 mb-4">{answersError}</p>
+                    <Button 
+                      onClick={() => handleQueryClick(activeQuery)}
+                      className="bg-secondary hover:bg-secondary/90 text-white"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                ) : answers.length === 0 ? (
+                  <div className="text-center py-8 border border-border rounded-lg bg-card p-6">
+                    <MessageCircle className="h-12 w-12 mx-auto text-text-muted mb-4" />
+                    <h3 className="text-lg font-medium text-text mb-2">No Answers Yet</h3>
+                    <p className="text-text-muted mb-6">
+                      Be the first to answer this question and help a fellow student!
+                    </p>
+                    <Button 
+                      className="bg-secondary hover:bg-secondary/90 text-white"
+                      onClick={() => {
+                        document.getElementById('answer-form').scrollIntoView({ 
+                          behavior: 'smooth', 
+                          block: 'start' 
+                        });
+                      }}
+                    >
+                      Write an Answer
+                    </Button>
+                  </div>
+                ) : (
+                  getAnswersForQuery(activeQuery.id).map((answer) => (
+                    <Card key={answer.id} className="bg-card border-border shadow-md mb-4">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-start">
+                            <Avatar className="h-10 w-10 mr-3">
+                              <AvatarImage src={answer.author?.avatar || "/placeholder.svg"} />
+                              <AvatarFallback className="bg-muted text-text-muted">
+                                {answer.author?.name ? answer.author.name.split(' ').map(n => n[0]).join('') : 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center">
+                                <span className="text-text font-medium mr-2">{answer.author?.name || "Anonymous"}</span>
+                                {answer.author?.role === "Teacher" && (
+                                  <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/30">
+                                    Teacher
+                                  </Badge>
+                                )}
+                                {answer.isVerified && (
+                                  <Badge className="ml-2 bg-green-500/10 text-green-500 border-green-500/30">
+                                    Verified Answer
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-text-muted text-sm">{new Date(answer.date || Date.now()).toLocaleDateString()}</div>
                             </div>
-                            <div className="text-text-muted text-sm">{answer.date}</div>
                           </div>
                         </div>
-                      </div>
-                      <p className="text-text mb-4">{answer.content}</p>
-                      {answer.codeSnippet && (
-                        <div className="mb-4 bg-muted p-4 rounded-md border border-border overflow-x-auto">
-                          <pre className="text-text-muted text-sm font-mono">
-                            <code>{answer.codeSnippet}</code>
-                          </pre>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                        <p className="text-text mb-4">{answer.content}</p>
+                        {answer.codeSnippet && (
+                          <div className="mb-4 bg-muted p-4 rounded-md border border-border overflow-x-auto">
+                            <pre className="text-text-muted text-sm font-mono">
+                              <code>{answer.codeSnippet}</code>
+                            </pre>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
 
               <Card className="bg-card border-border shadow-lg mt-6" id="answer-form">
@@ -764,8 +1096,33 @@ const QueriesPage = () => {
                 </TabsList>
                 
                 <TabsContent value="browse">
-                  <div className="space-y-6">
-                    {filteredQueries.map((query) => (
+                  {loading ? (
+                    <div className="flex justify-center items-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-8">
+                      <p className="text-red-500 mb-4">{error}</p>
+                      <Button onClick={fetchQueries} className="bg-secondary hover:bg-secondary/90 text-white">
+                        Try Again
+                      </Button>
+                    </div>
+                  ) : queries.length === 0 ? (
+                    <div className="text-center py-12">
+                      <MessageCircle className="w-16 h-16 mx-auto text-text-muted mb-4" />
+                      <h3 className="text-xl font-medium text-text mb-2">No Questions Yet</h3>
+                      <p className="text-text-muted max-w-md mx-auto mb-6">
+                        There are no questions available right now. Be the first to ask a question!
+                      </p>
+                      <Button 
+                        className="bg-secondary hover:bg-secondary/90 text-white"
+                        onClick={() => setShowNewQueryForm(true)}
+                      >
+                        Ask a Question
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">{filteredQueries.map((query) => (
                       <Card 
                         key={query.id} 
                         className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
@@ -830,31 +1187,96 @@ const QueriesPage = () => {
                           </div>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
+                    ))}</div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="my-questions">
-                  <Card className="bg-card shadow-lg rounded-lg overflow-hidden border border-border">
-                    <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
-                      <CardTitle className="text-2xl">My Questions</CardTitle>
-                      <CardDescription className="text-blue-100">
-                        Track and manage all your questions
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="text-center py-12">
-                        <Users className="w-16 h-16 mx-auto text-text-muted mb-4" />
-                        <h3 className="text-xl font-medium text-text mb-2">No Questions Yet</h3>
-                        <p className="text-text-muted max-w-md mx-auto mb-6">
-                          You haven't asked any questions yet. When you do, they will appear here.
-                        </p>
-                        <Button className="bg-secondary hover:bg-secondary/90 text-white">
-                          Ask Your First Question
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {loading ? (
+                    <div className="flex justify-center items-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-8">
+                      <p className="text-red-500 mb-4">{error}</p>
+                      <Button onClick={fetchQueries} className="bg-secondary hover:bg-secondary/90 text-white">
+                        Try Again
+                      </Button>
+                    </div>
+                  ) : queries.length === 0 ? (
+                    <Card className="bg-card shadow-lg rounded-lg overflow-hidden border border-border">
+                      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
+                        <CardTitle className="text-2xl">My Questions</CardTitle>
+                        <CardDescription className="text-blue-100">
+                          Track and manage all your questions
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-6">
+                        <div className="text-center py-12">
+                          <Users className="w-16 h-16 mx-auto text-text-muted mb-4" />
+                          <h3 className="text-xl font-medium text-text mb-2">No Questions Yet</h3>
+                          <p className="text-text-muted max-w-md mx-auto mb-6">
+                            You haven't asked any questions yet. When you do, they will appear here.
+                          </p>
+                          <Button 
+                            className="bg-secondary hover:bg-secondary/90 text-white"
+                            onClick={() => setShowNewQueryForm(true)}
+                          >
+                            Ask Your First Question
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="space-y-6">
+                      {queries.map((query) => (
+                        <Card 
+                          key={query.id} 
+                          className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                          onClick={() => handleQueryClick(query)}
+                        >
+                          <CardContent className="p-6">
+                            <div className="flex justify-between">
+                              <div>
+                                <h2 className="text-xl font-semibold text-text hover:text-secondary transition-colors duration-200">
+                                  {query.title}
+                                </h2>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {query.tags.map((tag, i) => (
+                                    <Badge key={i} className="bg-secondary/10 text-secondary border border-secondary/30">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                                <p className="mt-3 text-text-muted line-clamp-2">{query.body}</p>
+                              </div>
+                              <div className="flex flex-col items-end">
+                                <Badge className={`mb-2 ${
+                                  query.status === "Open" 
+                                    ? "bg-green-500/10 text-green-500 border-green-500/30" 
+                                    : "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                                }`}>
+                                  {query.status}
+                                </Badge>
+                                <div className="flex items-center text-text-muted text-sm">
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  <span>{query.date}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {query.codeSnippet && (
+                              <div className="mt-4 bg-muted p-3 rounded-md border border-border overflow-x-auto">
+                                <pre className="text-text-muted text-sm font-mono">
+                                  <code>{query.codeSnippet}</code>
+                                </pre>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="my-answers">

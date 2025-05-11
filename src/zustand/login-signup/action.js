@@ -40,7 +40,12 @@ export const getUserProfile = async (userRole) => {
             }
         });
         console.log('getUserProfile response:', res);
-        return res;
+        if(res.status === 200) {
+            localStorage.setItem('userData', JSON.stringify(res.data));
+            return res.data;
+        } else {
+            throw new Error('Failed to fetch user profile');
+        }
     } catch (error) {
         console.error('Error fetching user profile:', error);
         throw error;

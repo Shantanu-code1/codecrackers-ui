@@ -63,3 +63,168 @@ export const getAllDoubts = async () => {
         throw error;
     }
 };
+
+/**
+ * Submit a new query or doubt to the specified API endpoint
+ * @param {Object} queryData - The query data to submit
+ * @returns {Promise} - The API response
+ */
+export const submitQuery = async (queryData) => {
+    try {
+        // Get user data from localStorage
+        const userDataStr = localStorage.getItem('userData');
+        if (!userDataStr) {
+            throw new Error('No user data found in localStorage');
+        }
+        
+        const userData = JSON.parse(userDataStr);
+        const studentId = userData.id;
+        
+        if (!studentId) {
+            throw new Error('No student ID found in user data');
+        }
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        // Add a field to specify this is a query, not a doubt
+        const payload = {
+            ...queryData,
+            type: 'query', // Explicitly mark this as a query
+            isDoubt: false // Ensure it's not marked as a doubt
+        };
+        
+        const response = await axios.post(`${API_URL}/api/queries/student/${studentId}`, payload, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('Query submitted successfully:', response.data);
+        return response;
+    } catch (error) {
+        console.error('Error submitting query:', error.response?.data || error.message || error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch all queries for the student
+ * @returns {Promise} - The API response containing the list of queries
+ */
+export const getQueries = async () => {
+    try {
+        // Get user data from localStorage
+        const userDataStr = localStorage.getItem('userData');
+        if (!userDataStr) {
+            throw new Error('No user data found in localStorage');
+        }
+        
+        const userData = JSON.parse(userDataStr);
+        const studentId = userData.id;
+        
+        if (!studentId) {
+            throw new Error('No student ID found in user data');
+        }
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        // Specifically request queries only (not doubts)
+        const response = await axios.get(`${API_URL}/api/queries`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: {
+                type: 'query', // Specify that we only want queries, not doubts
+                studentId: studentId // Pass studentId as a parameter if needed
+            }
+        });
+        
+        console.log('Fetched queries successfully:', response.data);
+        return response.data; // Return the full response data including success flag and metadata
+    } catch (error) {
+        console.error('Error fetching queries:', error.response?.data || error.message || error);
+        throw error;
+    }
+};
+
+/**
+ * Get answers for a specific query
+ * @param {number} queryId - The ID of the query to get answers for
+ * @returns {Promise} - The API response containing the answers
+ */
+export const getQueryAnswers = async (queryId) => {
+    try {
+        if (!queryId) {
+            throw new Error('Query ID is required');
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        const response = await axios.get(`${API_URL}/api/answers/query/${queryId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        console.log(`Fetched answers for query ${queryId} successfully:`, response.data);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching answers for query ${queryId}:`, error.response?.data || error.message || error);
+        throw error;
+    }
+};
+
+/**
+ * Submit an answer to a query
+ * @param {number} queryId - The ID of the query being answered
+ * @param {Object} answerData - The answer data to submit
+ * @returns {Promise} - The API response
+ */
+export const submitAnswer = async (queryId, answerData) => {
+    try {
+        if (!queryId) {
+            throw new Error('Query ID is required');
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        // Get user data from localStorage
+        const userDataStr = localStorage.getItem('userData');
+        if (!userDataStr) {
+            throw new Error('No user data found in localStorage');
+        }
+        
+        const userData = JSON.parse(userDataStr);
+        let studentId = userData.id;
+        const payload = {
+            ...answerData,
+            studentId: studentId // Include the student ID who is answering
+        };
+        
+        const response = await axios.post(`${API_URL}/api/answers/doubt/${queryId}/student/${studentId}`, payload, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log(`Answer submitted for query ${queryId} successfully:`, response.data);
+        return response;
+    } catch (error) {
+        console.error(`Error submitting answer for query ${queryId}:`, error.response?.data || error.message || error);
+        throw error;
+    }
+};
