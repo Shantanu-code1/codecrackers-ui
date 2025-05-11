@@ -796,12 +796,6 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
                       </div>
                       <div className="flex items-center">
                         <span className="text-[#A1A1AA] text-sm mr-2">{category.count}</span>
-                        <Badge 
-                          variant="outline" 
-                          className="text-xs bg-[#0D1117] border-none text-[#A1A1AA]"
-                        >
-                          {category.percentage}%
-                        </Badge>
                       </div>
                     </div>
                     <motion.div 
