@@ -33,7 +33,7 @@ export const submitDoubt = async (doubtData) => {
         console.log('Doubt submitted successfully:', response.data);
         return response;
     } catch (error) {
-        console.error('Error submitting doubt:', error);
+        console.error('Error submitting doubt:', error.response || error);
         throw error;
     }
 };

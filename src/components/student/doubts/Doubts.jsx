@@ -76,7 +76,7 @@ const EnhancedDoubtPage = () => {
   })
   const [formErrors, setFormErrors] = useState({})
   const { submitDoubt, isSubmitting, isSuccess } = useSubmitDoubt()
-  const { doubtsData, isLoading, isError, error } = useFetchDoubts()
+  const { doubtsData, isLoading, isError, error, refetch } = useFetchDoubts()
 
   useEffect(() => {
     // Clear form and close modal when submission is successful
@@ -90,8 +90,11 @@ const EnhancedDoubtPage = () => {
       })
       setFormErrors({})
       setIsAskModalOpen(false)
+      
+      // Manually refetch the doubts after successful submission
+      refetch()
     }
-  }, [isSuccess])
+  }, [isSuccess, refetch])
 
   const togglePreview = () => {
     setPreviewMode(!previewMode)

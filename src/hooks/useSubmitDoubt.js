@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { submitDoubt } from '../zustand/student/action';
 import { toast } from 'react-toastify';
 
@@ -7,10 +7,14 @@ import { toast } from 'react-toastify';
  * @returns {Object} Mutation functions and state
  */
 export function useSubmitDoubt() {
+  const queryClient = useQueryClient();
+  
   const submitDoubtMutation = useMutation({
     mutationFn: submitDoubt,
     onSuccess: () => {
       toast.success('Your question has been submitted successfully');
+      // Invalidate the allDoubts query to refetch the list
+      queryClient.invalidateQueries({ queryKey: ['allDoubts'] });
     },
     onError: (error) => {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to submit your question';
