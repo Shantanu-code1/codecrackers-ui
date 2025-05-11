@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea"
 import { useSubmitDoubt } from "@/hooks/useSubmitDoubt"
 import { useFetchDoubts } from "@/hooks/useFetchDoubts"
+import { useUserDoubts } from "@/hooks/useUserDoubts"
+import signuporloginStore from '@/zustand/login-signup/store'
 
 const mockTeachers = [
   {
@@ -620,6 +622,9 @@ function DoubtCard({ doubt, onAddActivity }) {
 }
 
 function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
+  // Fetch user's doubts with the hook
+  const { userDoubtsData, isLoading: isUserDoubtsLoading } = useUserDoubts();
+  
   // Calculate dynamic stats only when not loading and data is available
   const stats = React.useMemo(() => {
     if (isLoading || !doubtsData || doubtsData.length === 0) {
@@ -627,22 +632,28 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
         { icon: MessageCircle, label: "Total Doubts", value: "-" },
         { icon: CheckCircle, label: "Answered", value: "-" },
         { icon: AlertCircle, label: "Pending", value: "-" },
-        { icon: UserCircle, label: "Your Doubts", value: "-" }, // Placeholder
+        { icon: UserCircle, label: "Your Doubts", value: "-" },
       ];
     }
 
     const totalDoubts = doubtsData.length;
     const answeredDoubts = doubtsData.filter(d => d.isSolved && d.isSolved !== "PENDING").length;
     const pendingDoubts = totalDoubts - answeredDoubts;
-    // const yourDoubts = doubtsData.filter(d => d.user.id === currentUserId).length; // Requires currentUserId
+    
+    // Get user doubts count - use loading state and fall back to "..." if still loading
+    const yourDoubts = isUserDoubtsLoading 
+      ? "..." 
+      : Array.isArray(userDoubtsData) 
+        ? userDoubtsData.length 
+        : 0;
 
     return [
       { icon: MessageCircle, label: "Total Doubts", value: totalDoubts.toString() },
       { icon: CheckCircle, label: "Answered", value: answeredDoubts.toString() },
       { icon: AlertCircle, label: "Pending", value: pendingDoubts.toString() },
-      { icon: UserCircle, label: "Your Doubts", value: "?" }, // Placeholder until user ID is available
+      { icon: UserCircle, label: "Your Doubts", value: yourDoubts.toString(), highlight: true },
     ];
-  }, [doubtsData, isLoading]);
+  }, [doubtsData, isLoading, userDoubtsData, isUserDoubtsLoading]);
 
   // Calculate top categories dynamically with better field detection
   const topCategories = React.useMemo(() => {
@@ -715,14 +726,17 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {stats.map((stat, index) => (
-                <div key={index} className="bg-[#0D1117] rounded-lg p-4 border border-[#30363D]">
+                <div 
+                  key={index} 
+                  className={`bg-[#0D1117] rounded-lg p-4 border ${stat.highlight ? 'border-[#0070F3]/30' : 'border-[#30363D]'} ${stat.highlight ? 'bg-[#0070F3]/5' : ''}`}
+                >
                   <div className="flex items-center mb-2">
-                    <div className="w-8 h-8 rounded-full bg-[#0070F3]/10 flex items-center justify-center mr-2">
-                      <stat.icon className="w-4 h-4 text-[#0070F3]" />
+                    <div className={`w-8 h-8 rounded-full ${stat.highlight ? 'bg-[#0070F3]/20' : 'bg-[#0070F3]/10'} flex items-center justify-center mr-2`}>
+                      <stat.icon className={`w-4 h-4 ${stat.highlight ? 'text-[#0070F3]' : 'text-[#0070F3]'}`} />
                     </div>
                     <span className="text-sm text-[#A1A1AA]">{stat.label}</span>
                   </div>
-                  <p className="text-2xl font-semibold text-[#E5E7EB]">{stat.value}</p>
+                  <p className={`text-2xl font-semibold ${stat.highlight ? 'text-[#0070F3]' : 'text-[#E5E7EB]'}`}>{stat.value}</p>
                 </div>
               ))}
             </div>
