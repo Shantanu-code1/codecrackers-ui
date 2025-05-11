@@ -18,125 +18,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { submitQuery, getQueries, getQueryAnswers, submitAnswer } from "@/zustand/student/action"
 import { toast } from "react-toastify"
 
-// Example mock data for answers, can be replaced with real API data later
-const mockAnswers = [
-  {
-    id: 1,
-    queryId: 1,
-    author: {
-      id: 2,
-      name: "Sophie Chen",
-      avatar: "/placeholder.svg",
-      role: "Teacher"
-    },
-    content: "In Redux, the store is the central piece that holds your application state. Here's how you can set it up correctly:",
-    codeSnippet: `// Define your reducers
-const counterReducer = (state = 0, action) => {
-  switch (action.type) {
-    case 'INCREMENT':
-      return state + 1;
-    case 'DECREMENT':
-      return state - 1;
-    default:
-      return state;
-  }
-};
-
-// Combine reducers if you have multiple
-import { combineReducers, createStore } from 'redux';
-const rootReducer = combineReducers({
-  counter: counterReducer,
-  // other reducers...
-});
-
-// Create the store
-const store = createStore(rootReducer);`,
-    date: "2025-03-10",
-    votes: {
-      up: 12,
-      down: 2
-    },
-    isVerified: true
-  },
-  {
-    id: 2,
-    queryId: 1,
-    author: {
-      id: 3,
-      name: "Miguel Rodriguez",
-      avatar: "/placeholder.svg",
-      role: "Student"
-    },
-    content: "I had the same issue last week. Make sure you're installing both redux and react-redux packages.",
-    codeSnippet: "",
-    date: "2025-03-11",
-    votes: {
-      up: 8,
-      down: 1
-    },
-    isVerified: false
-  }
-];
-
-// Expected API response format for queries
-const apiResponseFormat = {
-  success: true,
-  data: {
-    queries: [
-      {
-        id: 1,
-        title: "How do I implement a Redux store in a React application?",
-        body: "I'm new to Redux and I'm trying to set up a store in my React app. Can someone provide a simple example of how to properly configure Redux with React?",
-        codeSnippet: "import { createStore } from 'redux';\n\n// What should I put here?\nconst rootReducer = ???\n\nconst store = createStore(rootReducer);",
-        author: {
-          id: 1,
-          name: "Jamie Miller",
-          avatar: "/placeholder.svg",
-          role: "Student",
-        },
-        category: "React",
-        tags: ["react", "redux", "javascript"],
-        date: "2025-03-10",
-        views: 128,
-        answers: 3,
-        votes: 15,
-        status: "Open",
-      },
-      // Additional query objects...
-    ],
-    total: 25,
-    page: 1,
-    limit: 10
-  }
-};
-
-// Expected API response format for answers
-const apiAnswersResponseFormat = {
-  success: true,
-  data: {
-    answers: [
-      {
-        id: 1,
-        queryId: 1,
-        author: {
-          id: 2,
-          name: "Sophie Chen",
-          avatar: "/placeholder.svg",
-          role: "Teacher"
-        },
-        content: "In Redux, the store is the central piece that holds your application state. Here's how you can set it up correctly:",
-        codeSnippet: "// Define your reducers\nconst counterReducer = (state = 0, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return state + 1;\n    case 'DECREMENT':\n      return state - 1;\n    default:\n      return state;\n  }\n};\n\n// Combine reducers if you have multiple\nimport { combineReducers, createStore } from 'redux';\nconst rootReducer = combineReducers({\n  counter: counterReducer,\n  // other reducers...\n});\n\n// Create the store\nconst store = createStore(rootReducer);",
-        date: "2025-03-10",
-        votes: {
-          up: 12,
-          down: 2
-        },
-        isVerified: true
-      },
-      // Additional answer objects...
-    ]
-  }
-};
 
 const QueriesPage = () => {
   // State for real queries data
@@ -337,13 +218,17 @@ const QueriesPage = () => {
   const handleSubmitQuery = async (e) => {
     e.preventDefault()
     
+    // Check if tags are available
+    const tags = newQuery.tags || [];
+    console.log("Tags being submitted:", tags);
+    
     // Create the payload in the required format
     const payload = {
       title: newQuery.title,
       body: newQuery.body,
       codeSnippet: newQuery.codeSnippet,
       category: newQuery.category,
-      tags: newQuery.tags,
+      tags: tags, // Use the tags array
       type: 'query', // Explicitly mark as a query
       isDoubt: false // Make sure it's not a doubt
     }
@@ -619,25 +504,37 @@ const QueriesPage = () => {
                       </Label>
                       <MultiSelect
                         options={[
-                          { value: 'react', label: 'React' },
-                          { value: 'javascript', label: 'JavaScript' },
-                          { value: 'redux', label: 'Redux' },
-                          { value: 'api', label: 'API' },
-                          { value: 'async', label: 'Async' },
-                          { value: 'promises', label: 'Promises' },
-                          { value: 'error-handling', label: 'Error Handling' },
-                          { value: 'performance', label: 'Performance' },
-                          { value: 'optimization', label: 'Optimization' },
-                          { value: 'typescript', label: 'TypeScript' },
+                          { value: 'React', label: 'React' },
+                          { value: 'JavaScript', label: 'JavaScript' },
+                          { value: 'Redux', label: 'Redux' },
+                          { value: 'API', label: 'API' },
+                          { value: 'Async', label: 'Async' },
+                          { value: 'Promises', label: 'Promises' },
+                          { value: 'Error-Handling', label: 'Error Handling' },
+                          { value: 'Performance', label: 'Performance' },
+                          { value: 'Optimization', label: 'Optimization' },
+                          { value: 'TypeScript', label: 'TypeScript' },
+                          { value: 'CSS', label: 'CSS' },
+                          { value: 'HTML', label: 'HTML' },
+                          { value: 'Node.js', label: 'Node.js' },
+                          { value: 'Java', label: 'Java' },
+                          { value: 'Python', label: 'Python' },
+                          { value: 'C++', label: 'C++' },
+                          { value: 'Data Structures', label: 'Data Structures' },
+                          { value: 'Algorithms', label: 'Algorithms' },
+                          { value: 'Sorting', label: 'Sorting' },
+                          { value: 'DP', label: 'Dynamic Programming' },
                         ]}
                         selected={newQuery.tags.map(tag => ({ value: tag, label: tag }))}
-                        onChange={(selected) => 
+                        onChange={(selected) => {
+                          console.log("Selected tags:", selected);
                           setNewQuery({
                             ...newQuery, 
                             tags: selected.map(item => item.value)
-                          })
-                        }
+                          });
+                        }}
                         className="bg-muted border-border text-text"
+                        placeholder="Select tags for your question"
                       />
                     </div>
                   </div>

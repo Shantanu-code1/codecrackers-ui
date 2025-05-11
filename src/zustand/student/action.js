@@ -89,12 +89,26 @@ export const submitQuery = async (queryData) => {
             throw new Error('No authentication token found');
         }
         
+        // Process tags - ensure it's a properly formatted array
+        let tagsArray = [];
+        if (queryData.tags) {
+            if (Array.isArray(queryData.tags)) {
+                tagsArray = queryData.tags;
+            } else if (typeof queryData.tags === 'string') {
+                // If tags is a comma-separated string, split it
+                tagsArray = queryData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            }
+        }
+        
         // Add a field to specify this is a query, not a doubt
         const payload = {
             ...queryData,
+            tags: tagsArray, // Ensure tags is properly formatted
             type: 'query', // Explicitly mark this as a query
             isDoubt: false // Ensure it's not marked as a doubt
         };
+        
+        console.log("Submitting query with payload:", payload);
         
         const response = await axios.post(`${API_URL}/api/queries/student/${studentId}`, payload, {
             headers: {
