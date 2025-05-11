@@ -23,132 +23,6 @@ import Header from "../header/Header"
 import { useNavigate } from "react-router-dom"
 import signuporloginStore from "../../../zustand/login-signup/store"
 
-// Mock data for the profile
-const mockProfileData = {
-  personalInfo: {
-    name: "Alex Johnson",
-    role: "Computer Science Student",
-    email: "alex.johnson@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    bio: "Passionate student developer with interest in AI and machine learning. Currently pursuing a Computer Science degree and working on personal projects to enhance my skills.",
-    joinDate: "September 2023",
-    avatar: "/placeholder.svg",
-  },
-  stats: {
-    problemsSolved: 246,
-    streak: 8,
-    rank: 423,
-    contributions: 35
-  },
-  socialLinks: {
-    github: "github.com/alexjohnson",
-    twitter: "twitter.com/alexcode",
-    linkedin: "linkedin.com/in/alexjohnson",
-    website: "alexjohnson.dev"
-  },
-  skills: [
-    { name: "JavaScript", level: 85 },
-    { name: "React", level: 80 },
-    { name: "Python", level: 75 },
-    { name: "Node.js", level: 70 },
-    { name: "Machine Learning", level: 60 },
-    { name: "Data Structures", level: 85 },
-    { name: "Algorithms", level: 80 },
-  ],
-  projects: [
-    {
-      id: 1,
-      title: "AI Study Assistant",
-      technologies: ["Python", "TensorFlow", "React"],
-      description: "An AI-powered application that helps students organize study materials and provides personalized learning recommendations.",
-      link: "https://github.com/alexjohnson/ai-study-assistant"
-    },
-    {
-      id: 2,
-      title: "Code Analyzer",
-      technologies: ["JavaScript", "Node.js", "Express"],
-      description: "A tool that analyzes code quality and suggests improvements based on best practices.",
-      link: "https://github.com/alexjohnson/code-analyzer"
-    }
-  ],
-  education: [
-    {
-      id: 1,
-      institution: "Stanford University",
-      degree: "Bachelor of Science in Computer Science",
-      period: "2022 - Present",
-      description: "Focusing on AI and Machine Learning. Current GPA: 3.8/4.0",
-    },
-    {
-      id: 2,
-      institution: "Tech Preparatory High School",
-      degree: "High School Diploma",
-      period: "2018 - 2022",
-      description: "Graduated with honors. President of the Coding Club.",
-    },
-  ],
-  experience: [
-    {
-      id: 1,
-      company: "TechStart Innovations",
-      position: "Software Development Intern",
-      period: "Summer 2024",
-      description: "Worked on front-end development using React. Implemented responsive UIs and integrated APIs.",
-    },
-    {
-      id: 2,
-      company: "CodeCamp",
-      position: "Teaching Assistant",
-      period: "Fall 2023",
-      description: "Assisted in teaching introductory programming concepts to first-year students.",
-    },
-  ],
-  achievements: [
-    {
-      id: 1,
-      title: "Hackathon Winner",
-      date: "March 2024",
-      description: "First place in university hackathon for developing an AI-powered study assistant.",
-    },
-    {
-      id: 2,
-      title: "Dean's List",
-      date: "2022-2023",
-      description: "Recognized for academic excellence for two consecutive semesters.",
-    },
-    {
-      id: 3,
-      title: "Open Source Contributor",
-      date: "Ongoing",
-      description: "Active contributor to various open source projects with over 50 accepted pull requests.",
-    },
-  ],
-  courses: [
-    {
-      id: 1,
-      title: "Advanced Machine Learning",
-      provider: "Stanford University",
-      completion: "May 2024",
-      certificate: true,
-    },
-    {
-      id: 2,
-      title: "Full Stack Development",
-      provider: "Codecademy",
-      completion: "January 2024",
-      certificate: true,
-    },
-    {
-      id: 3,
-      title: "Data Structures and Algorithms",
-      provider: "Stanford University",
-      completion: "December 2023",
-      certificate: false,
-    },
-  ],
-}
-
 const ProfilePage = () => {
   const logout = signuporloginStore(state => state.logout);
   const userData = signuporloginStore(state => state.userData);
@@ -159,7 +33,43 @@ const ProfilePage = () => {
     navigate('/login');
   };
   
-  const [profile, setProfile] = useState(mockProfileData)
+  const [profile, setProfile] = useState({
+    personalInfo: {
+      name: userData?.name || "User",
+      role: userData?.role === "ROLE_STUDENT" ? "Student" : userData?.role || "Student",
+      email: userData?.email || "",
+      phone: userData?.phoneNumber || "",
+      location: userData?.location || "India",
+      bio: userData?.bio || "CodeCrackers platform user",
+      joinDate: userData?.joinDate || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      avatar: userData?.profileImage || "/placeholder.svg",
+    },
+    stats: {
+      problemsSolved: userData?.done || 0,
+      streak: userData?.shares || 0,
+      rank: userData?.rating || 0,
+      contributions: userData?.points || 0
+    },
+    socialLinks: {
+      github: userData?.codingProfileLink || "",
+      twitter: "",
+      linkedin: "",
+      website: ""
+    },
+    skills: userData?.skills || [
+      { name: "Problem Solving", level: 75 },
+      { name: "Data Structures", level: 70 },
+    ],
+    projects: userData?.projects || [],
+    education: userData?.education || [],
+    experience: userData?.experience || [],
+    achievements: userData?.achievements || [],
+    courses: userData?.courses || [],
+    earningInfo: {
+      current: userData?.earning || "0",
+      total: userData?.totalEarning || "0"
+    }
+  });
   const [activeTab, setActiveTab] = useState("overview")
   const [editMode, setEditMode] = useState({
     personalInfo: false,
