@@ -3,13 +3,14 @@ import { motion } from "framer-motion"
 import { Code, LogIn, LogOut } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import signuporloginStore from '@/zustand/login-signup/store'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 const Header = () => {
   // Get user data and logout function from store
   const userData = signuporloginStore(state => state.userData);
   const logout = signuporloginStore(state => state.logout);
   const navigate = useNavigate();
+  const location = useLocation(); // Get current route
   
   // Determine user role from store or use fallback
   const userRole = userData?.role || "ROLE_STUDENT"; // Fallback to student if no role
@@ -17,6 +18,11 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  // Function to check if a link is active
+  const isActive = (path) => {
+    return location.pathname.includes(path.toLowerCase());
   };
 
   console.log("Current user data:", userData); // Add this to debug
@@ -51,7 +57,11 @@ const Header = () => {
                           ? `/student/${item.toLowerCase()}`
                           : `/teacher/${item.toLowerCase()}`
                         }
-                        className="text-sm font-medium transition-colors duration-200 text-text hover:text-secondary"
+                        className={`text-sm font-medium transition-colors duration-200 ${
+                          isActive(item.toLowerCase()) 
+                            ? "text-secondary font-semibold" 
+                            : "text-text hover:text-secondary"
+                        }`}
                       >
                         {item}
                       </Link>
@@ -64,7 +74,11 @@ const Header = () => {
                     <motion.div key={item}>
                       <Link
                         to={`/student/${item.toLowerCase()}`}
-                        className="text-sm font-medium transition-colors duration-200 text-text hover:text-secondary"
+                        className={`text-sm font-medium transition-colors duration-200 ${
+                          isActive(item.toLowerCase()) 
+                            ? "text-secondary font-semibold" 
+                            : "text-text hover:text-secondary"
+                        }`}
                       >
                         {item}
                       </Link>
