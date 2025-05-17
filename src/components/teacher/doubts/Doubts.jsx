@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { 
   MessageSquare, Search, Filter, Clock, Star, 
   ChevronDown, CheckCircle, Calendar, BarChart2, 
@@ -21,143 +21,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import Header from "../../student/header/Header"
 import { DollarSign } from "lucide-react"
+import { getAllDoubts } from "../../../zustand/student/action"
 
-// Mock data for doubts
-const mockDoubts = [
-  {
-    id: 1,
-    title: "Implementing Redux with React Hooks",
-    description: "I'm trying to use Redux with React Hooks but getting an error with useSelector. Can someone explain how to properly set up Redux with functional components?",
-    codeSnippet: `import { useSelector, useDispatch } from 'react-redux';
-
-function Counter() {
-  const count = useSelector(state => state.counter.value);
-  const dispatch = useDispatch();
-  
-  // Getting TypeError: Cannot read property 'value' of undefined
-  return (
-    <div>
-      <span>{count}</span>
-      <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
-    </div>
-  );
-}`,
-    programmingLanguage: "JavaScript",
-    category: "React",
-    tags: ["react", "redux", "hooks"],
-    status: "pending",
-    timePosted: "2 hours ago",
-    priority: "high",
-    complexity: "medium",
-    bounty: 45,
-    estimatedTime: "15-20 min"
-  },
-  {
-    id: 2,
-    title: "Python List Comprehension vs. For Loops Performance",
-    description: "I've heard that list comprehensions are faster than for loops in Python. Can someone explain why and when I should use each approach?",
-    codeSnippet: `# Using for loop
-result = []
-for i in range(1000):
-    if i % 2 == 0:
-        result.append(i * i)
-        
-# Using list comprehension
-result = [i * i for i in range(1000) if i % 2 == 0]
-
-# Which is more efficient and why?`,
-    programmingLanguage: "Python",
-    category: "Python",
-    tags: ["python", "performance", "list-comprehension"],
-    status: "pending",
-    timePosted: "4 hours ago",
-    priority: "medium",
-    complexity: "low",
-    bounty: 30,
-    estimatedTime: "10-15 min"
-  },
-  {
-    id: 3,
-    title: "Understanding SQL Joins and Their Performance Implications",
-    description: "I'm working with a large database and need to understand the performance differences between INNER JOIN, LEFT JOIN, and using WHERE clauses. Which approach is most efficient for joining tables with millions of records?",
-    codeSnippet: `-- Option 1: INNER JOIN
-SELECT users.name, orders.product
-FROM users
-INNER JOIN orders ON users.id = orders.user_id;
-
--- Option 2: LEFT JOIN
-SELECT users.name, orders.product
-FROM users
-LEFT JOIN orders ON users.id = orders.user_id;
-
--- Option 3: WHERE clause
-SELECT users.name, orders.product
-FROM users, orders
-WHERE users.id = orders.user_id;`,
-    programmingLanguage: "SQL",
-    category: "Databases",
-    tags: ["sql", "database", "performance"],
-    status: "pending",
-    timePosted: "1 day ago",
-    priority: "low",
-    complexity: "high",
-    bounty: 60,
-    estimatedTime: "25-30 min"
-  },
-  {
-    id: 4,
-    title: "Java Stream API vs. Traditional Loops",
-    description: "I'm working on a project where performance is critical. Should I use Java's Stream API or stick with traditional for loops for processing collections?",
-    codeSnippet: `// Traditional approach
-List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-List<Integer> evenSquares = new ArrayList<>();
-for (Integer num : numbers) {
-    if (num % 2 == 0) {
-        evenSquares.add(num * num);
-    }
-}
-
-// Stream API approach
-List<Integer> evenSquaresStream = numbers.stream()
-    .filter(num -> num % 2 == 0)
-    .map(num -> num * num)
-    .collect(Collectors.toList());`,
-    programmingLanguage: "Java",
-    category: "Java",
-    tags: ["java", "streams", "performance"],
-    status: "pending",
-    timePosted: "5 hours ago",
-    priority: "medium",
-    complexity: "medium",
-    bounty: 40,
-    estimatedTime: "15-20 min"
-  },
-  {
-    id: 5,
-    title: "TypeScript Generic Constraints",
-    description: "I'm trying to create a function that works with objects that have a specific property, but TypeScript is giving me errors. How do I properly use generic constraints?",
-    codeSnippet: `// This doesn't work
-function getProperty<T>(obj: T, key: keyof T) {
-    return obj[key];
-}
-
-// I want to ensure T has a 'name' property
-function getName<T>(obj: T) {
-    return obj.name; // Error: Property 'name' does not exist on type 'T'
-}
-
-// How do I fix this?`,
-    programmingLanguage: "TypeScript",
-    category: "TypeScript",
-    tags: ["typescript", "generics"],
-    status: "pending",
-    timePosted: "3 hours ago",
-    priority: "high",
-    complexity: "medium",
-    bounty: 50,
-    estimatedTime: "20-25 min"
-  }
-];
+// Mock data for doubts - This will be removed
+// const mockDoubts = [ ... ];
 
 // Statistics for the dashboard
 const mockStats = {
@@ -169,7 +36,9 @@ const mockStats = {
 };
 
 const TeacherDoubtsPage = () => {
-  const [doubts, setDoubts] = useState(mockDoubts);
+  const [doubts, setDoubts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("pending");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState({
@@ -179,8 +48,47 @@ const TeacherDoubtsPage = () => {
   });
   const [selectedDoubt, setSelectedDoubt] = useState(null);
   
-  // Filter doubts based on search and filters
+  useEffect(() => {
+    const fetchDoubtsData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const rawData = await getAllDoubts(); 
+        // Map API response to the structure expected by the component
+        const mappedDoubts = (Array.isArray(rawData) ? rawData : rawData.doubts || []).map(doubt => ({
+          id: doubt.id,
+          title: doubt.title,
+          description: doubt.description,
+          codeSnippet: doubt.codeSnippet,
+          programmingLanguage: doubt.topic, // Map topic to programmingLanguage
+          category: doubt.topic, // Use topic for category as well, or adjust as needed
+          tags: doubt.tagsList || (doubt.tags ? doubt.tags.split(',').map(t => t.trim()) : []), // Map tagsList or split tags string
+          status: doubt.isSolved === "PENDING" ? "pending" : "answered", // Map isSolved to status
+          timePosted: new Date(doubt.timeSubmitted).toLocaleString(), // Format timeSubmitted
+          // priority, complexity, bounty, estimatedTime are removed as per user request or if not in API
+          // Add any other necessary fields here, with defaults if needed
+          bounty: doubt.bounty || 0, // Keep bounty if it exists, otherwise default or remove if not needed
+        }));
+        setDoubts(mappedDoubts);
+      } catch (e) {
+        setError(e.message || "Failed to fetch doubts");
+        console.error("Failed to fetch doubts:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoubtsData();
+  }, []);
+  
+  // Filter doubts based on search, filters, and activeTab
   const filteredDoubts = doubts.filter(doubt => {
+    // Status filter based on activeTab
+    const statusMatch = activeTab === "all" || 
+                        (activeTab === "pending" && doubt.status === "pending") ||
+                        (activeTab === "answered" && doubt.status === "answered"); // Ensure your API uses "answered" or adjust as needed
+
+    if (!statusMatch) return false;
+    
     // Search filter
     const searchMatch = 
       doubt.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -195,6 +103,11 @@ const TeacherDoubtsPage = () => {
     return searchMatch && languageMatch && priorityMatch && complexityMatch;
   });
   
+  // Calculate counts for tabs
+  const pendingDoubtsCount = doubts.filter(d => d.status === "pending").length;
+  const answeredDoubtsCount = doubts.filter(d => d.status !== "pending").length; // Consider any non-pending as answered for now
+  const allDoubtsCount = doubts.length;
+  
   // Handle selecting a doubt to view/answer
   const handleDoubtSelect = (doubt) => {
     setSelectedDoubt(doubt);
@@ -204,6 +117,29 @@ const TeacherDoubtsPage = () => {
   const handleBackToList = () => {
     setSelectedDoubt(null);
   };
+  
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary via-primary/95 to-primary text-text pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+          <p className="text-xl text-text-muted">Loading doubts...</p>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-primary via-primary/95 to-primary text-text pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+          <p className="text-xl text-red-500">Error fetching doubts: {error}</p>
+          <p className="text-text-muted mt-2">Please try again later or contact support.</p>
+        </div>
+      </>
+    );
+  }
   
   return (
     <>
@@ -294,14 +230,15 @@ const TeacherDoubtsPage = () => {
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border text-text">
                       <SelectItem value="all">All Languages</SelectItem>
-                      <SelectItem value="JavaScript">JavaScript</SelectItem>
-                      <SelectItem value="Python">Python</SelectItem>
-                      <SelectItem value="Java">Java</SelectItem>
-                      <SelectItem value="TypeScript">TypeScript</SelectItem>
-                      <SelectItem value="SQL">SQL</SelectItem>
+                      {/* Dynamically populate these from available topics in doubts or a predefined list */}
+                      {[...new Set(doubts.map(d => d.programmingLanguage))].map(lang => (
+                        <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   
+                  {/* Priority and Complexity filters removed as data is not in API response */}
+                  {/* 
                   <Select 
                     value={filter.priority} 
                     onValueChange={(value) => setFilter({...filter, priority: value})}
@@ -331,6 +268,7 @@ const TeacherDoubtsPage = () => {
                       <SelectItem value="low">Simple</SelectItem>
                     </SelectContent>
                   </Select>
+                  */}
                 </div>
               </div>
               
@@ -338,13 +276,13 @@ const TeacherDoubtsPage = () => {
               <Tabs defaultValue="pending" className="w-full" onValueChange={setActiveTab}>
                 <TabsList className="bg-muted/50 border border-border inline-flex mb-6">
                   <TabsTrigger value="pending" className="data-[state=active]:bg-secondary data-[state=active]:text-white">
-                    Pending ({mockStats.pendingDoubts})
+                    Pending ({pendingDoubtsCount})
                   </TabsTrigger>
                   <TabsTrigger value="answered" className="data-[state=active]:bg-secondary data-[state=active]:text-white">
-                    Answered
+                    Answered ({answeredDoubtsCount})
                   </TabsTrigger>
                   <TabsTrigger value="all" className="data-[state=active]:bg-secondary data-[state=active]:text-white">
-                    All Doubts
+                    All Doubts ({allDoubtsCount})
                   </TabsTrigger>
                 </TabsList>
                 
@@ -361,13 +299,6 @@ const TeacherDoubtsPage = () => {
                             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <Badge className={`
-                                    ${doubt.priority === 'high' ? 'bg-red-500/10 text-red-500 border-red-500/30' : 
-                                      doubt.priority === 'medium' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30' : 
-                                      'bg-green-500/10 text-green-500 border-green-500/30'}
-                                  `}>
-                                    {doubt.priority.charAt(0).toUpperCase() + doubt.priority.slice(1)} Priority
-                                  </Badge>
                                   <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/30">
                                     {doubt.programmingLanguage}
                                   </Badge>
@@ -387,8 +318,9 @@ const TeacherDoubtsPage = () => {
                               
                               <div className="flex flex-col items-end gap-2">
                                 <div className="text-right">
-                                  <div className="text-xl font-semibold text-secondary">${doubt.bounty}</div>
-                                  <div className="text-text-muted text-xs">Estimated: {doubt.estimatedTime}</div>
+                                  {/* Bounty and Estimated Time Removed */}
+                                  {/* <div className="text-xl font-semibold text-secondary">${doubt.bounty}</div> */}
+                                  {/* <div className="text-text-muted text-xs">Estimated: {doubt.estimatedTime}</div> */}
                                 </div>
                                 
                                 <div className="flex items-center text-text-muted text-xs">
@@ -413,7 +345,9 @@ const TeacherDoubtsPage = () => {
                         <p className="text-text-muted max-w-md mx-auto">
                           {search || filter.language !== "all" || filter.priority !== "all" || filter.complexity !== "all" ? 
                             "No doubts match your current filters. Try adjusting your search criteria." : 
-                            "There are no pending doubts to answer right now. Check back later for new questions."}
+                            activeTab === "pending" ? "There are no pending doubts to answer right now. Check back later!" :
+                            activeTab === "answered" ? "No doubts have been answered yet." :
+                            "There are no doubts available at the moment."}
                         </p>
                       </CardContent>
                     </Card>
@@ -440,27 +374,30 @@ const TeacherDoubtsPage = () => {
                       <CardDescription className="text-text-muted mt-1">
                         <span className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          Posted {selectedDoubt.timePosted} • Estimated time: {selectedDoubt.estimatedTime}
+                          Posted {selectedDoubt.timePosted} {/* Estimated time removed */}
                         </span>
                       </CardDescription>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-secondary">${selectedDoubt.bounty}</div>
+                      {/* Bounty display removed */}
+                      {/* <div className="text-2xl font-bold text-secondary">${selectedDoubt.bounty}</div> */}
                       <div className="flex gap-2 mt-2">
-                        <Badge className={`
+                        {/* Priority Badge Removed */}
+                        {/* <Badge className={`
                           ${selectedDoubt.priority === 'high' ? 'bg-red-500/10 text-red-500 border-red-500/30' : 
                             selectedDoubt.priority === 'medium' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30' : 
                             'bg-green-500/10 text-green-500 border-green-500/30'}
                         `}>
                           {selectedDoubt.priority.charAt(0).toUpperCase() + selectedDoubt.priority.slice(1)} Priority
-                        </Badge>
-                        <Badge className={`
+                        </Badge> */}
+                        {/* Complexity Badge Removed */}
+                        {/* <Badge className={`
                           ${selectedDoubt.complexity === 'high' ? 'bg-purple-500/10 text-purple-500 border-purple-500/30' : 
                             selectedDoubt.complexity === 'medium' ? 'bg-blue-500/10 text-blue-500 border-blue-500/30' : 
                             'bg-green-500/10 text-green-500 border-green-500/30'}
                         `}>
                           {selectedDoubt.complexity.charAt(0).toUpperCase() + selectedDoubt.complexity.slice(1)} Complexity
-                        </Badge>
+                        </Badge> */}
                       </div>
                     </div>
                   </div>
@@ -564,7 +501,7 @@ const TeacherDoubtsPage = () => {
                       Preview Answer
                     </Button>
                     <Button className="bg-secondary hover:bg-secondary/90 text-white">
-                      Submit Answer (${selectedDoubt.bounty})
+                      Submit Answer {/* Bounty removed from button text */}
                     </Button>
                   </div>
                 </CardFooter>
