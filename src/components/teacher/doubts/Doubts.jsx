@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label"
 import Header from "../../student/header/Header"
 import { DollarSign } from "lucide-react"
 import { getAllDoubts } from "../../../zustand/student/action"
+import { initiateAnswerSession } from "../../../zustand/teacher/action"
 
 // Mock data for doubts - This will be removed
 // const mockDoubts = [ ... ];
@@ -47,6 +48,7 @@ const TeacherDoubtsPage = () => {
     complexity: "all"
   });
   const [selectedDoubt, setSelectedDoubt] = useState(null);
+  const [initiatingSessionFor, setInitiatingSessionFor] = useState(null);
   
   useEffect(() => {
     const fetchDoubtsData = async () => {
@@ -111,6 +113,26 @@ const TeacherDoubtsPage = () => {
   // Handle selecting a doubt to view/answer
   const handleDoubtSelect = (doubt) => {
     setSelectedDoubt(doubt);
+  };
+
+  const handleInitiateAndSelectDoubt = async (doubt) => {
+    if (!doubt || !doubt.id) {
+      console.error("Invalid doubt object or missing doubt ID");
+      return;
+    }
+    setInitiatingSessionFor(doubt.id);
+    try {
+      await initiateAnswerSession(doubt.id);
+      // If successful, then select the doubt to show details
+      handleDoubtSelect(doubt);
+    } catch (apiError) {
+      // Handle error (e.g., show a notification to the user)
+      console.error("Failed to initiate answer session:", apiError);
+      // Optionally, display an error message to the user here
+      alert(`Error initiating session for doubt: ${doubt.title}. Please try again.`);
+    } finally {
+      setInitiatingSessionFor(null);
+    }
   };
   
   // Close detailed view
@@ -293,7 +315,11 @@ const TeacherDoubtsPage = () => {
                         <Card 
                           key={doubt.id} 
                           className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-                          onClick={() => handleDoubtSelect(doubt)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleInitiateAndSelectDoubt(doubt);
+                          }}
+                          disabled={initiatingSessionFor === doubt.id}
                         >
                           <CardContent className="p-5">
                             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -328,8 +354,15 @@ const TeacherDoubtsPage = () => {
                                   <span>Posted {doubt.timePosted}</span>
                                 </div>
                                 
-                                <Button className="mt-2 bg-secondary hover:bg-secondary/90 text-white">
-                                  Answer Question
+                                <Button 
+                                  className="mt-2 bg-secondary hover:bg-secondary/90 text-white"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleInitiateAndSelectDoubt(doubt);
+                                  }}
+                                  disabled={initiatingSessionFor === doubt.id}
+                                >
+                                  {initiatingSessionFor === doubt.id ? "Initiating..." : "Answer Question"}
                                 </Button>
                               </div>
                             </div>
