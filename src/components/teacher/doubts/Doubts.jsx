@@ -21,7 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import Header from "../../student/header/Header"
 import { DollarSign } from "lucide-react"
-import { getAllDoubts } from "../../../zustand/student/action"
+import { getAllDoubtsForAdminsOrTeachers } from "../../../zustand/student/action"
 import { initiateAnswerSession } from "../../../zustand/teacher/action"
 
 // Mock data for doubts - This will be removed
@@ -55,7 +55,7 @@ const TeacherDoubtsPage = () => {
       setLoading(true);
       setError(null);
       try {
-        const rawData = await getAllDoubts(); 
+        const rawData = await getAllDoubtsForAdminsOrTeachers();
         // Map API response to the structure expected by the component
         const mappedDoubts = (Array.isArray(rawData) ? rawData : rawData.doubts || []).map(doubt => ({
           id: doubt.id,

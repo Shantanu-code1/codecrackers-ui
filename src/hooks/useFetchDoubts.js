@@ -1,24 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllDoubts } from '../zustand/student/action';
+import { getStudentDoubts } from '../zustand/student/action';
 import { toast } from 'react-toastify';
 
 /**
- * Custom hook to fetch all doubts
+ * Custom hook to fetch doubts for the logged-in student
  * @returns {Object} Doubts data, loading state, error state, and refetch function
  */
 export function useFetchDoubts() {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['allDoubts'],
-    queryFn: getAllDoubts,
+    queryKey: ['studentDoubts'],
+    queryFn: getStudentDoubts,
     staleTime: 1000 * 60 * 5, // 5 minutes
     onError: (error) => {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch doubts';
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch student doubts';
       toast.error(errorMessage);
     }
   });
 
   return {
-    doubtsData: data || [], // Return an empty array if data is undefined
+    doubtsData: data || [],
     isLoading,
     isError: !!error,
     error,

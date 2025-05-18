@@ -39,10 +39,10 @@ export const submitDoubt = async (doubtData) => {
 };
 
 /**
- * Fetch all doubts
+ * Fetch all doubts (intended for admin/teacher roles)
  * @returns {Promise} - The API response containing the list of doubts
  */
-export const getAllDoubts = async () => {
+export const getAllDoubtsForAdminsOrTeachers = async () => {
     try {
         const token = localStorage.getItem('token');
         
@@ -60,6 +60,119 @@ export const getAllDoubts = async () => {
         return response.data; // Return the data directly
     } catch (error) {
         console.error('Error fetching all doubts:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch all doubts for the currently logged-in student using their email.
+ * @returns {Promise} - The API response containing the list of the student's doubts.
+ */
+export const getStudentDoubts = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        const userDataStr = localStorage.getItem('userData');
+        if (!userDataStr) {
+            throw new Error('No user data found in localStorage');
+        }
+        const userData = JSON.parse(userDataStr);
+        const userEmail = userData.email;
+
+        if (!userEmail) {
+            throw new Error('No email found in user data for fetching student doubts');
+        }
+
+        const response = await axios.get(`${API_URL}/api/doubts/user/email/${userEmail}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        console.log('Fetched student doubts successfully:', response.data);
+        return response.data; // Return the data directly
+    } catch (error) {
+        console.error('Error fetching student doubts:', error.response?.data || error.message || error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch a list of recent doubts.
+ * @param {number} [limit=3] - The maximum number of recent doubts to fetch.
+ * @returns {Promise} - The API response containing a list of RecentDoubtDTO objects.
+ */
+export const getRecentDoubts = async (limit = 3) => {
+    try {
+        const token = localStorage.getItem('token'); // Assuming this might need auth too
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        const response = await axios.get(`${API_URL}/api/doubts/recent`, {
+            params: { limit },
+            headers: { 'Authorization': `Bearer ${token}` } 
+        });
+        console.log('Fetched recent doubts:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching recent doubts:', error.response?.data || error.message || error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch a list of recent doubts filtered by category.
+ * @param {string} category - The category to filter by.
+ * @param {number} [limit=3] - The maximum number of doubts to fetch.
+ * @returns {Promise} - The API response containing a list of RecentDoubtDTO objects.
+ */
+export const getDoubtsByCategory = async (category, limit = 3) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        if (!category) {
+            throw new Error('Category is required for fetching doubts by category');
+        }
+        const response = await axios.get(`${API_URL}/api/doubts/category/${category}`, {
+            params: { limit },
+            headers: { 'Authorization': `Bearer ${token}` } 
+        });
+        console.log(`Fetched doubts for category ${category}:`, response.data);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching doubts for category ${category}:`, error.response?.data || error.message || error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch a list of recent doubts filtered by type (e.g., doubts, queries, ai).
+ * @param {string} filterType - The filter to apply (maps to "filter" path variable).
+ * @param {number} [limit=3] - The maximum number of doubts to fetch.
+ * @returns {Promise} - The API response containing a list of RecentDoubtDTO objects.
+ */
+export const getDoubtsByFilterType = async (filterType, limit = 3) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        if (!filterType) {
+            throw new Error('Filter type is required for fetching filtered doubts');
+        }
+        const response = await axios.get(`${API_URL}/api/doubts/filter/${filterType}`, {
+            params: { limit },
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        console.log(`Fetched doubts by filter ${filterType}:`, response.data);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching doubts by filter ${filterType}:`, error.response?.data || error.message || error);
         throw error;
     }
 };
