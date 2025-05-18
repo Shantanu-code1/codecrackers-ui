@@ -317,7 +317,7 @@ const TeacherDoubtsPage = () => {
                           className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleInitiateAndSelectDoubt(doubt);
+                            // handleInitiateAndSelectDoubt(doubt);
                           }}
                           disabled={initiatingSessionFor === doubt.id}
                         >
