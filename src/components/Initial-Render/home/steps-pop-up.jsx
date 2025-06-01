@@ -76,7 +76,7 @@ export const TryNowStepsDialog = ({ isOpen, onClose }) => {
             }}
           />
           <div className="flex justify-between items-center relative z-10">
-            <h2 className="text-white text-2xl font-bold">How CodeCrackers Works</h2>
+            <h2 className="text-white text-2xl font-bold">How niqSolve Works</h2>
             <button
               onClick={handleClose}
               className="h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
