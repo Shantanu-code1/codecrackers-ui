@@ -11,7 +11,6 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: [],
       output: {
         manualChunks: {
           'recharts': ['recharts']
@@ -21,5 +20,8 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['recharts']
+  },
+  ssr: {
+    noExternal: ['recharts']
   }
 })
