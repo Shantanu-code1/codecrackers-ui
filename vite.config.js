@@ -16,10 +16,13 @@ export default defineConfig({
           'recharts': ['recharts']
         }
       }
+    },
+    commonjsOptions: {
+      include: [/recharts/, /node_modules/]
     }
   },
   optimizeDeps: {
-    include: ['recharts']
+    include: ['recharts', 'recharts/lib/index']
   },
   ssr: {
     noExternal: ['recharts']

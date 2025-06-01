@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react"
 import { motion } from "framer-motion"
 import { Search, Brain, Rocket, Users, Sparkles, Flame, AlertCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
-import { LineChart, Line, ResponsiveContainer, AreaChart, XAxis, YAxis, Area, Tooltip } from "@/utils/chartsImports"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import Header from "../header/Header"
 import { ChevronDown } from "lucide-react"
@@ -15,6 +14,9 @@ import signuporloginStore from "../../../zustand/login-signup/store";
 import { useUserProfile } from '../../../hooks/useUserProfile'
 import { useRecentDoubts } from '../../../hooks/useRecentDoubts'
 import { useMonthlyStatus } from '../../../hooks/useMonthlyStatus'
+
+// Lazy load the chart component to avoid build issues
+const ChartComponent = lazy(() => import('./ChartComponent'))
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -362,29 +364,9 @@ export default function Dashboard() {
               {isPotdLoading ? (
                 <div className="h-[300px] flex justify-center items-center text-[#A1A1AA]">Loading Chart Data...</div>
               ) : ( 
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0070F3" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#0070F3" stopOpacity={0.1}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis 
-                      dataKey="time" 
-                      stroke="#A1A1AA" 
-                      tick={{ fontSize: 10 }}
-                      interval={0}
-                    />
-                    <YAxis 
-                      stroke="#A1A1AA" 
-                      label={{ value: 'XP Earned', angle: -90, position: 'insideLeft', stroke: '#A1A1AA' }} 
-                      allowDecimals={false}
-                    />
-                    <Tooltip contentStyle={{ backgroundColor: '#161B22', borderColor: '#30363D', color: '#E5E7EB', borderRadius: '8px' }} formatter={(value) => [`${value} XP`, 'Earned']} />
-                    <Area type="monotone" dataKey="xp" name="XP" stroke="#0070F3" fillOpacity={1} fill="url(#colorXp)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <Suspense fallback={<div className="h-[300px] flex justify-center items-center text-[#A1A1AA]">Loading Chart Data...</div>}>
+                  <ChartComponent data={chartData} />
+                </Suspense>
               )}
               
               <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#30363D]/30">
