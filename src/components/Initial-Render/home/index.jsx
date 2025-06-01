@@ -8,6 +8,7 @@ import ImagesCircle from "../circle-animation/index.jsx"
 import Header from "../header-start/Header.jsx"
 import CustomCursor from "../../../pages/ui/custom-cursor/CustomCursor.jsx"
 import PageContainer from '@/components/layout/PageContainer'
+import logo from "../../../img/niqSolve2.png"
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("fast")
@@ -198,7 +199,7 @@ const Home = () => {
         <PageContainer>
           <div className="max-w-5xl mx-auto flex flex-wrap justify-between items-center">
             <div className="w-full md:w-1/3 mb-6 md:mb-0">
-              <h3 className="text-xl font-bold mb-2">Codecrackers</h3>
+              <img src={logo} alt="NiqSolve" className="w-[10rem] h-[3rem] ml-[-1rem]" />
               <p className="text-sm text-[#A1A1AA]">Empowering students through instant doubt resolution</p>
             </div>
             <div className="w-full md:w-1/3 mb-6 md:mb-0">

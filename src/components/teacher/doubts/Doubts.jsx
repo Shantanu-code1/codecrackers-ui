@@ -109,6 +109,20 @@ const TeacherDoubtsPage = () => {
   const pendingDoubtsCount = doubts.filter(d => d.status === "pending").length;
   const answeredDoubtsCount = doubts.filter(d => d.status !== "pending").length; // Consider any non-pending as answered for now
   const allDoubtsCount = doubts.length;
+
+  // Calculate total earnings from resolved doubts
+  const totalEarningsFromResolved = doubts
+    .filter(d => d.status === "answered") // Assuming 'answered' means resolved for earning purposes
+    .reduce((sum, doubt) => sum + (doubt.bounty || 0), 0);
+
+  // Prepare dashboard statistics
+  const dashboardStats = {
+    pendingDoubts: pendingDoubtsCount,
+    resolvedToday: mockStats.resolvedToday, // Cannot be calculated from current API data
+    averageResponseTime: mockStats.averageResponseTime, // Cannot be calculated from current API data
+    totalEarnings: totalEarningsFromResolved, // Changed from earningsToday
+    totalResolved: answeredDoubtsCount,
+  };
   
   // Handle selecting a doubt to view/answer
   const handleDoubtSelect = (doubt) => {
@@ -184,7 +198,7 @@ const TeacherDoubtsPage = () => {
                     <div className="bg-blue-500/10 p-3 rounded-full mb-2">
                       <MessageSquare className="h-5 w-5 text-blue-500" />
                     </div>
-                    <div className="text-2xl font-bold text-text">{mockStats.pendingDoubts}</div>
+                    <div className="text-2xl font-bold text-text">{dashboardStats.pendingDoubts}</div>
                     <p className="text-text-muted text-sm">Pending Doubts</p>
                   </CardContent>
                 </Card>
@@ -194,7 +208,7 @@ const TeacherDoubtsPage = () => {
                     <div className="bg-green-500/10 p-3 rounded-full mb-2">
                       <CheckCircle className="h-5 w-5 text-green-500" />
                     </div>
-                    <div className="text-2xl font-bold text-text">{mockStats.resolvedToday}</div>
+                    <div className="text-2xl font-bold text-text">{dashboardStats.resolvedToday}</div>
                     <p className="text-text-muted text-sm">Resolved Today</p>
                   </CardContent>
                 </Card>
@@ -204,7 +218,7 @@ const TeacherDoubtsPage = () => {
                     <div className="bg-yellow-500/10 p-3 rounded-full mb-2">
                       <Clock className="h-5 w-5 text-yellow-500" />
                     </div>
-                    <div className="text-2xl font-bold text-text">{mockStats.averageResponseTime}</div>
+                    <div className="text-2xl font-bold text-text">{dashboardStats.averageResponseTime}</div>
                     <p className="text-text-muted text-sm">Avg. Response Time</p>
                   </CardContent>
                 </Card>
@@ -214,8 +228,8 @@ const TeacherDoubtsPage = () => {
                     <div className="bg-secondary/10 p-3 rounded-full mb-2">
                       <DollarSign className="h-5 w-5 text-secondary" />
                     </div>
-                    <div className="text-2xl font-bold text-text">${mockStats.earningsToday}</div>
-                    <p className="text-text-muted text-sm">Earnings Today</p>
+                    <div className="text-2xl font-bold text-text">${dashboardStats.totalEarnings}</div>
+                    <p className="text-text-muted text-sm">Total Earnings</p>
                   </CardContent>
                 </Card>
                 
@@ -224,7 +238,7 @@ const TeacherDoubtsPage = () => {
                     <div className="bg-purple-500/10 p-3 rounded-full mb-2">
                       <BarChart2 className="h-5 w-5 text-purple-500" />
                     </div>
-                    <div className="text-2xl font-bold text-text">{mockStats.totalResolved}</div>
+                    <div className="text-2xl font-bold text-text">{dashboardStats.totalResolved}</div>
                     <p className="text-text-muted text-sm">Total Resolved</p>
                   </CardContent>
                 </Card>

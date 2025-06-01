@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { Code, LogIn } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { useNavigate } from 'react-router-dom'
+import logo from "../../../img/niqSolve-removebg.png"
 
 const Header = ({openStepsDialog}) => {
     const navigate = useNavigate();
@@ -16,7 +17,10 @@ const Header = ({openStepsDialog}) => {
             className="text-2xl font-bold text-text flex items-center space-x-2"
           >
             {/* <Code className="h-8 w-8 text-secondary" /> */}
-            <a href="/" className='text-2xl font-bold text-text'>Codecrackers</a>
+            <a href="/" className='text-2xl font-bold text-text'>
+            <img src={logo} alt="NiqSolve" className="w-[10rem] h-[4rem] ml-[3rem]" />
+            {/* NiqSolve */}
+            </a>
           </motion.div>
           <motion.nav
             className="w-[20%]"
