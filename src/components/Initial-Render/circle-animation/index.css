@@ -7,15 +7,41 @@
   justify-content: center;
   align-items: center;
   transition: all 1s ease-in-out;
+  overflow: visible; /* Allow hover cards to show outside container */
 }
 
 .imgs {
   transition: transform 0.3s ease, margin 1s ease-in-out;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.imgs:hover {
-  transform: scale(1.1);
-  z-index: 10;
+/* Desktop hover effects */
+@media (min-width: 768px) {
+  .imgs:hover {
+    transform: scale(1.1);
+    z-index: 10;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .circle-container {
+    padding: 0 1rem;
+    overflow: hidden; /* On mobile, we don't need hover cards */
+  }
+  
+  .imgs {
+    /* Smaller hover effect on mobile for better touch interaction */
+    transition: transform 0.2s ease;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .circle-container {
+    padding: 0 2rem;
+  }
 }
 
 

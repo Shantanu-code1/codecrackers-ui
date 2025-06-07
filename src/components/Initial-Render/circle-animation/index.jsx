@@ -32,13 +32,13 @@ const imagePaths = [
       "A powerful, high-performance programming language used for system/software development, game programming, and more.",
     color: "#00599C",
   },
-  {
-    src: docker,
-    name: "Docker",
-    description:
-      "A platform for developing, shipping, and running applications in containers, ensuring consistency across different environments.",
-    color: "#2496ED",
-  },
+  // {
+  //   src: docker,
+  //   name: "Docker",
+  //   description:
+  //     "A platform for developing, shipping, and running applications in containers, ensuring consistency across different environments.",
+  //   color: "#2496ED",
+  // },
   {
     src: spring,
     name: "Spring",
@@ -213,11 +213,29 @@ const ImagesCircle = () => {
   const [isShrunk, setIsShrunk] = useState(false)
   const [visibleImages, setVisibleImages] = useState(0)
   const [hoveredImage, setHoveredImage] = useState(null)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
   const numImages = imagePaths.length
   const angleStep = 360 / numImages
-  const gapSize = 20 // Gap size in pixels
-  const circleRadius = 200 // Circle radius
+  
+  // Responsive dimensions
+  const isMobile = windowWidth < 768
+  const isTablet = windowWidth >= 768 && windowWidth < 1024
+  
+  const gapSize = isMobile ? 8 : isTablet ? 12 : 20 // Gap size in pixels
+  const circleRadius = isMobile ? 120 : isTablet ? 160 : 200 // Circle radius
+  const imageSize = isMobile ? 40 : isTablet ? 50 : 60 // Image size
+  const containerHeight = isMobile ? 280 : isTablet ? 340 : 400 // Container height
+  const shrunkHeight = isMobile ? 160 : isTablet ? 150 : 200 // Shrunk height (increased for mobile two rows)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     // Start rotation immediately
@@ -260,16 +278,37 @@ const ImagesCircle = () => {
 
   return (
     <div
-      className={`circle-container ${
-        isShrunk ? "h-[200px] ml-[3rem]" : "h-[400px]"
-      } transition-all duration-1000 ease-in-out flex justify-center items-center relative`}
+      className={`circle-container transition-all duration-1000 ease-in-out flex justify-center items-center relative`}
+      style={{
+        height: isShrunk ? `${shrunkHeight}px` : `${containerHeight}px`,
+        marginLeft: isShrunk && !isMobile ? '3rem' : '0',
+        paddingTop: isShrunk ? '80px' : '0', // Add space for hover cards
+        overflow: 'visible' // Allow hover cards to show outside container
+      }}
     >
       {imagePaths.map((img, i) => {
         const angle = angleStep * i + rotation
         const circleX = `calc(${circleRadius}px * ${Math.cos((angle - 90) * (Math.PI / 180))})`
         const circleY = `calc(${circleRadius}px * ${Math.sin((angle - 90) * (Math.PI / 180))})`
-        const lineX = `${i * (60 + gapSize) - (numImages * (60 + gapSize)) / 2}px`
-        const lineY = "0px"
+        
+        // Responsive line positioning - mobile gets two rows
+        let lineX, lineY;
+        
+        if (isMobile) {
+          // Mobile: Arrange in two rows
+          const iconsPerRow = Math.ceil(numImages / 2);
+          const row = Math.floor(i / iconsPerRow);
+          const colInRow = i % iconsPerRow;
+          const rowWidth = iconsPerRow * (imageSize + gapSize);
+          
+          lineX = `${(colInRow * (imageSize + gapSize)) - (rowWidth / 2) + (imageSize / 2)}px`;
+          lineY = `${(row * (imageSize + gapSize + 10)) - 20}px`; // 10px extra gap between rows
+        } else {
+          // Desktop/Tablet: Single horizontal line
+          const totalLineWidth = numImages * (imageSize + gapSize);
+          lineX = `${i * (imageSize + gapSize) - (totalLineWidth / 2)}px`;
+          lineY = "0px";
+        }
 
         const x = `calc((1 - ${transitionProgress}) * (${circleX}) + ${transitionProgress} * (${lineX}))`
         const y = `calc((1 - ${transitionProgress}) * (${circleY}) + ${transitionProgress} * (${lineY}))`
@@ -280,23 +319,23 @@ const ImagesCircle = () => {
             className="absolute flex justify-center items-center"
             initial={false}
             animate={{
-              x: `calc(50% + ${x} - 30px)`,
-              y: `calc(50% + ${y} - 30px)`,
+              x: `calc(50% + ${x} - ${imageSize / 2}px)`,
+              y: `calc(50% + ${y} - ${imageSize / 2}px)`,
             }}
             transition={{
               duration: 0.1,
               ease: "linear",
             }}
-            onMouseEnter={() => isShrunk && setHoveredImage(i)}
+            onMouseEnter={() => isShrunk && !isMobile && setHoveredImage(i)}
             onMouseLeave={() => setHoveredImage(null)}
           >
             <img
               src={img.src || "/placeholder.svg"}
               alt={img.name}
-              width={60}
-              height={60}
-              className={`imgs object-cover shadow-md transition-all duration-300 ease-in-out p-2 rounded-full ${
-                isShrunk ? "hover:scale-110" : ""
+              width={imageSize}
+              height={imageSize}
+              className={`imgs object-cover shadow-md transition-all duration-300 ease-in-out p-1 sm:p-2 rounded-full ${
+                isShrunk && !isMobile ? "hover:scale-110 cursor-pointer" : ""
               }`}
               style={{
                 opacity: i < visibleImages ? 1 : 0,
@@ -304,7 +343,7 @@ const ImagesCircle = () => {
               }}
             />
             <AnimatePresence>
-              {isShrunk && hoveredImage === i && (
+              {isShrunk && hoveredImage === i && !isMobile && (
                 <HoverCard name={img.name} description={img.description} icon={img.src} color={img.color} />
               )}
             </AnimatePresence>

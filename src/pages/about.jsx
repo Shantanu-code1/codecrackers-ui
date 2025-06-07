@@ -27,7 +27,7 @@ const AboutPage = () => {
             animate="visible"
             variants={fadeIn}
           >
-            About <span className="text-secondary">Codecrackers</span>
+            About <span className="text-secondary">niqSolve</span>
           </motion.h1>
           <motion.p 
             className="text-xl text-text-muted max-w-3xl mx-auto mb-10"
@@ -62,7 +62,7 @@ const AboutPage = () => {
               <Award className="h-12 w-12 text-accent mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-text mb-3">Our Values</h3>
               <p className="text-text-muted">
-                Excellence, accessibility, and innovation drive everything we do at Codecrackers.
+                Excellence, accessibility, and innovation drive everything we do at niqSolve.
               </p>
             </motion.div>
             
@@ -93,7 +93,7 @@ const AboutPage = () => {
             <h2 className="text-3xl font-bold text-text mb-4">Our Story</h2>
             <div className="w-20 h-1 bg-secondary mx-auto mb-8"></div>
             <p className="text-text-muted max-w-3xl mx-auto">
-              Codecrackers was founded in 2023 by a group of passionate educators and software engineers who 
+              niqSolve was founded in 2023 by a group of passionate educators and software engineers who 
               recognized a gap in coding education. Students often got stuck on problems for hours, disrupting 
               their learning momentum and causing frustration.
             </p>
@@ -127,7 +127,7 @@ const AboutPage = () => {
             >
               <h3 className="text-2xl font-bold text-text mb-4">From Idea to Innovation</h3>
               <p className="text-text-muted mb-6">
-                We built Codecrackers to provide immediate, high-quality help when students need it most. 
+                We built niqSolve to provide immediate, high-quality help when students need it most. 
                 Our platform combines the best of AI technology with human expertise to deliver personalized 
                 learning experiences.
               </p>
@@ -158,7 +158,7 @@ const AboutPage = () => {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            <h2 className="text-3xl font-bold text-text mb-4">Why Choose Codecrackers</h2>
+            <h2 className="text-3xl font-bold text-text mb-4">Why Choose niqSolve</h2>
             <div className="w-20 h-1 bg-accent mx-auto mb-8"></div>
           </motion.div>
           
@@ -219,7 +219,7 @@ const AboutPage = () => {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            Join thousands of students who are learning faster and more effectively with Codecrackers.
+            Join thousands of students who are learning faster and more effectively with niqSolve.
           </motion.p>
           <motion.div
             initial="hidden"
@@ -241,7 +241,7 @@ const AboutPage = () => {
       <footer className="bg-primary/80 text-text py-8 px-4 border-t border-border">
         <div className="max-w-5xl mx-auto flex flex-wrap justify-between items-center">
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
-            <h3 className="text-xl font-bold mb-2">Codecrackers</h3>
+            <h3 className="text-xl font-bold mb-2">niqSolve</h3>
             <p className="text-sm text-text-muted">Empowering students through instant doubt resolution</p>
           </div>
           <div className="w-full md:w-1/3 mb-6 md:mb-0">

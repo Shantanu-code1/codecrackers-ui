@@ -324,7 +324,7 @@ const PricingPage = () => {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            Join Codecrackers today and take your coding skills to the next level. No credit card required for free accounts.
+            Join niqSolve today and take your coding skills to the next level. No credit card required for free accounts.
           </motion.p>
           <motion.div
             initial="hidden"
@@ -346,7 +346,7 @@ const PricingPage = () => {
       <footer className="bg-primary/80 text-text py-8 px-4">
         <div className="max-w-5xl mx-auto flex flex-wrap justify-between items-center">
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
-            <h3 className="text-xl font-bold mb-2">Codecrackers</h3>
+            <h3 className="text-xl font-bold mb-2">niqSolve</h3>
             <p className="text-sm text-text-muted">Empowering students through instant doubt resolution</p>
           </div>
           <div className="w-full md:w-1/3 mb-6 md:mb-0">

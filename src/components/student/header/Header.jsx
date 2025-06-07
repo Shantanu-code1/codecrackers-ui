@@ -37,7 +37,7 @@ const Header = () => {
             transition={{ duration: 0.5 }}
             className="text-2xl font-bold text-text flex items-center space-x-2"
           >
-            <Link to={userRole === "ROLE_TEACHER" ? "/teacher/dashboard" : "/student/dashboard"} className="text-text">Codecrackers</Link>
+            <Link to={userRole === "ROLE_TEACHER" ? "/teacher/dashboard" : "/student/dashboard"} className="text-text">niqSolve</Link>
           </motion.div>
           
           <motion.nav

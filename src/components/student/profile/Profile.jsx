@@ -40,7 +40,7 @@ const ProfilePage = () => {
       email: userData?.email || "",
       phone: userData?.phoneNumber || "",
       location: userData?.location || "India",
-      bio: userData?.bio || "CodeCrackers platform user",
+      bio: userData?.bio || "niqSolve platform user",
       joinDate: userData?.joinDate || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       avatar: userData?.profileImage || "/placeholder.svg",
     },
