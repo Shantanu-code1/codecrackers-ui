@@ -629,10 +629,9 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
   const stats = React.useMemo(() => {
     if (isLoading || !doubtsData || doubtsData.length === 0) {
       return [
-        { icon: MessageCircle, label: "Total Doubts", value: "-" },
-        { icon: CheckCircle, label: "Answered", value: "-" },
-        { icon: AlertCircle, label: "Pending", value: "-" },
         { icon: UserCircle, label: "Your Doubts", value: "-" },
+        { icon: CheckCircle, label: "Answered", value: "-" },
+        { icon: AlertCircle, label: "Pending", value: "-" }
       ];
     }
 
@@ -648,10 +647,9 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
         : 0;
 
     return [
-      { icon: MessageCircle, label: "Total Doubts", value: totalDoubts.toString() },
+      { icon: UserCircle, label: "Your Doubts", value: yourDoubts.toString(), highlight: true },
       { icon: CheckCircle, label: "Answered", value: answeredDoubts.toString() },
       { icon: AlertCircle, label: "Pending", value: pendingDoubts.toString() },
-      { icon: UserCircle, label: "Your Doubts", value: yourDoubts.toString(), highlight: true },
     ];
   }, [doubtsData, isLoading, userDoubtsData, isUserDoubtsLoading]);
 
@@ -823,58 +821,6 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
               <p className="text-xs mt-1">Submit questions to see categories</p>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Recent Activity Card */}
-      <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
-        <CardHeader className="pb-3 border-b border-[#30363D]/50">
-          <CardTitle className="text-xl font-semibold flex items-center">
-            <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
-            Recent Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y divide-[#30363D]">
-            {recentActivities.length > 0 ? (
-              recentActivities.map((activity) => (
-                <div key={activity.id} className="p-4 flex items-start">
-                  <div className="w-8 h-8 rounded-full bg-[#0D1117] flex items-center justify-center mr-3">
-                    {activity.type === "question_asked" ? (
-                      <MessageCircle className="w-4 h-4 text-[#0070F3]" />
-                    ) : activity.type === "question_answered" ? (
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                    ) : activity.type === "doubt_saved" ? (
-                      <Star className="w-4 h-4 text-amber-500" />
-                    ) : activity.type === "question_reply" ? (
-                      <MessageCircle className="w-4 h-4 text-purple-500" />
-                    ) : (
-                      <Clock className="w-4 h-4 text-[#A1A1AA]" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-[#E5E7EB]">
-                      {activity.title ? 
-                        `${activity.type === "question_asked" ? "New question" : 
-                          activity.type === "question_answered" ? "Question answered" : 
-                          activity.type === "doubt_saved" ? "Saved doubt" :
-                          activity.type === "question_reply" ? "Started a reply" : 
-                          "Activity"}: ${activity.title}` 
-                        : activity.detail}
-                    </p>
-                    <p className="text-xs text-[#A1A1AA] mt-1">
-                      {formatRelativeTime(activity.timestamp)}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-4 text-center text-[#A1A1AA]">
-                <p>No recent activity to show</p>
-                <p className="text-xs mt-1">Your activities will appear here</p>
-              </div>
-            )}
-          </div>
         </CardContent>
       </Card>
     </div>
