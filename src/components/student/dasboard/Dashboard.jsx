@@ -4,7 +4,6 @@ import { Search, Brain, Rocket, Users, Sparkles, Flame, AlertCircle } from "luci
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import Header from "../header/Header"
 import { ChevronDown } from "lucide-react"
