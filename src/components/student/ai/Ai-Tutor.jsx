@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import Header from '../header/Header'
+import logo from "../../../img/niqSolve-removebg.png"
 
 // Mock AI responses and data
 const AI_RESPONSES = {
@@ -123,7 +124,7 @@ const AiTutor = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      <Header />
+      {!showChat && <Header />}
       
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -281,33 +282,44 @@ const AiTutor = () => {
         ) : (
           // Chat View
           <div className="flex-1 flex flex-col">
-            {/* Chat Header */}
-            <div className="border-b border-white/10 bg-black/20 backdrop-blur-lg sticky top-0 z-10">
-              <div className="max-w-4xl mx-auto px-4 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <Brain className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-lg font-semibold text-white">AI Tutor</h1>
-                      <p className="text-sm text-gray-300">Ready to help you learn</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setMessages([])
-                      setShowChat(false)
-                    }}
-                    className="text-gray-300 hover:text-white hover:bg-white/10"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
+                         {/* Chat Header */}
+             <div className="border-b border-white/10 backdrop-blur-lg sticky top-0 z-10">
+               <div className="max-w-full mx-auto px-4 py-4">
+                 <div className="flex items-center justify-between">
+                   {/* Left side - niqSolve name */}
+                   <motion.div
+                     initial={{ x: 0, opacity: 1 }}
+                     animate={{ x: 0, opacity: 1 }}
+                     transition={{ duration: 0.5, ease: "easeInOut" }}
+                     className="flex items-center space-x-3"
+                   >
+                      <img src={logo} alt="NiqSolve" className="w-[8rem] h-[3rem] sm:w-[10rem] sm:h-[4rem]" />
+                      <p className="text-sm text-gray-300">AI Tutor Assistant</p>
+                   </motion.div>
+
+                   {/* Right side - Card element */}
+                   <motion.div
+                     initial={{ x: 100, opacity: 0 }}
+                     animate={{ x: 0, opacity: 1 }}
+                     transition={{ duration: 0.5, ease: "easeInOut", delay: 0.2 }}
+                     className="bg-card/90 backdrop-blur-sm px-6 py-[1rem] rounded-full w-[25rem] shadow-lg border border-secondary/20 flex items-center justify-between"
+                   >
+                     <span className="text-white text-sm">Chat with AI Tutor</span>
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       onClick={() => {
+                         setMessages([])
+                         setShowChat(false)
+                       }}
+                       className="text-gray-300 hover:text-white hover:bg-white/10 ml-2"
+                     >
+                       <RotateCcw className="w-4 h-4" />
+                     </Button>
+                   </motion.div>
+                 </div>
+               </div>
+             </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto">

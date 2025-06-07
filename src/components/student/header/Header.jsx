@@ -4,6 +4,7 @@ import { Code, LogIn, LogOut } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import signuporloginStore from '@/zustand/login-signup/store'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import logo from "../../../img/niqSolve-removebg.png"
 
 const Header = () => {
   // Get user data and logout function from store
@@ -37,7 +38,9 @@ const Header = () => {
             transition={{ duration: 0.5 }}
             className="text-2xl font-bold text-text flex items-center space-x-2"
           >
-            <Link to={userRole === "ROLE_TEACHER" ? "/teacher/dashboard" : "/student/ai-tutor"} className="text-text">niqSolve</Link>
+            <Link to={userRole === "ROLE_TEACHER" ? "/teacher/dashboard" : "/student/ai-tutor"} className="text-text">
+              <img src={logo} alt="NiqSolve" className="w-[8rem] h-[3rem] sm:w-[10rem] sm:h-[4rem]" />
+            </Link>
           </motion.div>
           
           <motion.nav
