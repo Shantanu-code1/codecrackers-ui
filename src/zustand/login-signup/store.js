@@ -53,13 +53,13 @@ const signuporloginStore = create((set, get) => ({
                 // Redirect based on role - using window.location.replace for more reliable redirect
                 console.log("Redirecting user based on role:", userRole);
                 if (userRole === "ROLE_STUDENT") {
-                    window.location.replace('/student/dashboard');
+                    window.location.replace('/student/ai-tutor');
                 } else if (userRole === "ROLE_TEACHER") {
                     window.location.replace('/teacher/profile');
                 } else {
                     // Fallback - if role is undefined or unknown
                     console.warn("Unknown role, defaulting to student dashboard");
-                    window.location.replace('/student/dashboard');
+                    window.location.replace('/student/ai-tutor');
                 }
             }
             

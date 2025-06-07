@@ -37,7 +37,7 @@ const Header = () => {
             transition={{ duration: 0.5 }}
             className="text-2xl font-bold text-text flex items-center space-x-2"
           >
-            <Link to={userRole === "ROLE_TEACHER" ? "/teacher/dashboard" : "/student/dashboard"} className="text-text">niqSolve</Link>
+            <Link to={userRole === "ROLE_TEACHER" ? "/teacher/dashboard" : "/student/ai-tutor"} className="text-text">niqSolve</Link>
           </motion.div>
           
           <motion.nav
@@ -70,7 +70,7 @@ const Header = () => {
                 </>
               ) : (
                 <>
-                  {["Dashboard", "Doubts", "Queries", "Profile"].map((item) => (
+                  {["AI-Tutor", "Doubts", "Queries", "Profile"].map((item) => (
                     <motion.div key={item}>
                       <Link
                         to={`/student/${item.toLowerCase()}`}

@@ -7,7 +7,6 @@ import Pricing from './pages/pricing/Pricing';
 import SignupPage from './components/Initial-Render/auth/singnup/index';
 import SignInPage from './components/Initial-Render/auth/signin/index';
 import Home from './components/Initial-Render/home/index';
-import Dashboard from './components/student/dasboard/Dashboard';
 import DoubtsPage from './components/student/doubts/Doubts';
 import ProfilePage from './components/student/profile/Profile';
 import QueriesPage from './components/student/queries/Queries';
@@ -18,6 +17,7 @@ import TeacherDoubtsPage from './components/teacher/doubts/Doubts';
 import OTPVerificationPage from './components/Initial-Render/auth/verify-otp';
 import AdminPage from './pages/admin';
 import signuporloginStore from './zustand/login-signup/store';
+import AiTutor from './components/student/ai/Ai-Tutor';
 
 function App() {
   // Get authentication state and initializer from store
@@ -38,7 +38,7 @@ function App() {
 
   // Fix the typo and define correct routes
   const privateRoutes = [
-    { path: '/student/dashboard', component: Dashboard },
+    { path: '/student/ai-tutor', component: AiTutor },
     { path: '/student/doubts', component: DoubtsPage },
     { path: '/student/profile', component: ProfilePage },
     { path: '/student/queries', component: QueriesPage },

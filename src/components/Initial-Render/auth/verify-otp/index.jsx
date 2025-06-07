@@ -130,7 +130,7 @@ export default function OTPVerificationPage() {
           navigate('/teacher/profile');
         } else {
           // Default to student dashboard
-          navigate('/student/dashboard');
+          navigate('/student/ai-tutor');
         }
       }
       
