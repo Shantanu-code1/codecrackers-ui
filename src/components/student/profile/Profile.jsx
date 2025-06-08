@@ -1,24 +1,14 @@
-import React, { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import React, { useState, useRef } from "react"
+import { motion } from "framer-motion"
 import { 
-  User, Edit, Mail, Calendar, MapPin, Briefcase, Award, Book, 
-  GraduationCap, Settings, Code, ExternalLink, MessageSquare, 
-  CheckCircle, Clock, Star, FileText, Grid, Key, Shield, 
-  Save, Bell, Moon, Sun, LogOut, Zap
+  Edit, Mail, LogOut, Save, Camera, MapPin, Calendar, User, TrendingDown, AlertTriangle
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { PrimaryButton, SecondaryButton } from "@/components/ui/custom-button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { PrimaryButton } from "@/components/ui/custom-button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { RichTextEditor } from "../doubts/ui/rich-text"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MultiSelect } from "../doubts/ui/multi-select"
-import { Progress } from "@/components/ui/progress"
-import { Switch } from "@/components/ui/switch"
 import Header from "../header/Header"
 import { useNavigate } from "react-router-dom"
 import signuporloginStore from "../../../zustand/login-signup/store"
@@ -36,100 +26,43 @@ const ProfilePage = () => {
   const [profile, setProfile] = useState({
     personalInfo: {
       name: userData?.name || "User",
-      role: userData?.role === "ROLE_STUDENT" ? "Student" : userData?.role || "Student",
       email: userData?.email || "",
-      phone: userData?.phoneNumber || "",
-      location: userData?.location || "India",
-      bio: userData?.bio || "niqSolve platform user",
-      joinDate: userData?.joinDate || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       avatar: userData?.profileImage || "/placeholder.svg",
+      bio: userData?.bio || "Student at niqSolve platform",
+      location: userData?.location || "India",
+      joinDate: userData?.joinDate || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    },
+    doubtStreak: {
+      current: userData?.doubtStreak || 5,
+      longest: userData?.longestDoubtStreak || 12,
+      lastDoubtDate: userData?.lastDoubtDate || new Date().toISOString().split('T')[0]
     },
     stats: {
-      problemsSolved: userData?.done || 0,
-      streak: userData?.shares || 0,
-      rank: userData?.rating || 0,
-      contributions: userData?.points || 0
+      doubtsSolved: userData?.doubtsSolved || 23,
+      totalDoubts: userData?.totalDoubts || 31
     },
-    socialLinks: {
-      github: userData?.codingProfileLink || "",
-      twitter: "",
-      linkedin: "",
-      website: ""
-    },
-    skills: userData?.skills || [
-      { name: "Problem Solving", level: 75 },
-      { name: "Data Structures", level: 70 },
-    ],
-    projects: userData?.projects || [],
-    education: userData?.education || [],
-    experience: userData?.experience || [],
-    achievements: userData?.achievements || [],
-    courses: userData?.courses || [],
-    earningInfo: {
-      current: userData?.earning || "0",
-      total: userData?.totalEarning || "0"
-    }
+    improvementAreas: userData?.improvementAreas || [
+      { topic: "JavaScript Async/Await", successRate: 45, priority: "high", doubtsCount: 8 },
+      { topic: "SQL Joins", successRate: 60, priority: "medium", doubtsCount: 5 },
+      { topic: "React Hooks", successRate: 70, priority: "low", doubtsCount: 3 }
+    ]
   });
-  const [activeTab, setActiveTab] = useState("overview")
-  const [editMode, setEditMode] = useState({
-    personalInfo: false,
-    bio: false,
-    skills: false,
-  })
-  const [newSkill, setNewSkill] = useState({ name: "", level: 50 })
-  const [tempPersonalInfo, setTempPersonalInfo] = useState(profile.personalInfo)
-  const [availableSkills, setAvailableSkills] = useState([
-    { value: "javascript", label: "JavaScript" },
-    { value: "python", label: "Python" },
-    { value: "react", label: "React" },
-    { value: "node", label: "Node.js" },
-    { value: "java", label: "Java" },
-    { value: "csharp", label: "C#" },
-    { value: "cpp", label: "C++" },
-    { value: "ruby", label: "Ruby" },
-    { value: "go", label: "Go" },
-    { value: "swift", label: "Swift" },
-    { value: "kotlin", label: "Kotlin" },
-    { value: "rust", label: "Rust" },
-    { value: "scala", label: "Scala" },
-    { value: "typescript", label: "TypeScript" },
-    { value: "php", label: "PHP" },
-    { value: "html", label: "HTML" },
-    { value: "css", label: "CSS" },
-    { value: "sql", label: "SQL" },
-    { value: "mongodb", label: "MongoDB" },
-    { value: "aws", label: "AWS" },
-    { value: "docker", label: "Docker" },
-    { value: "kubernetes", label: "Kubernetes" },
-    { value: "linux", label: "Linux" },
-    { value: "git", label: "Git" },
-    { value: "algorithms", label: "Algorithms" },
-    { value: "data-structures", label: "Data Structures" },
-    { value: "machine-learning", label: "Machine Learning" },
-    { value: "deep-learning", label: "Deep Learning" },
-    { value: "ai", label: "Artificial Intelligence" },
-    { value: "data-science", label: "Data Science" },
-  ])
 
-  const toggleEditMode = (section) => {
-    if (section === "personalInfo" && !editMode.personalInfo) {
+  const [editMode, setEditMode] = useState(false)
+  const [tempPersonalInfo, setTempPersonalInfo] = useState(profile.personalInfo)
+  const fileInputRef = useRef(null)
+
+  const toggleEditMode = () => {
+    if (!editMode) {
       setTempPersonalInfo({ ...profile.personalInfo })
+    } else {
+      // Save changes
+      setProfile({
+        ...profile,
+        personalInfo: tempPersonalInfo,
+      })
     }
-    
-    setEditMode({
-      ...editMode,
-      [section]: !editMode[section],
-    })
-    
-    if (editMode[section]) {
-      // Save was clicked, update with changes if necessary
-      if (section === "personalInfo") {
-        setProfile({
-          ...profile,
-          personalInfo: tempPersonalInfo,
-        })
-      }
-    }
+    setEditMode(!editMode)
   }
 
   const handlePersonalInfoChange = (e) => {
@@ -140,28 +73,24 @@ const ProfilePage = () => {
     })
   }
 
-  const handleBioChange = (content) => {
-    setTempPersonalInfo({
-      ...tempPersonalInfo,
-      bio: content,
-    })
-  }
-
-  const addSkill = () => {
-    if (newSkill.name) {
-      setProfile({
-        ...profile,
-        skills: [...profile.skills, newSkill],
-      })
-      setNewSkill({ name: "", level: 50 })
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setTempPersonalInfo({
+          ...tempPersonalInfo,
+          avatar: e.target.result,
+        })
+      }
+      reader.readAsDataURL(file)
     }
   }
 
-  const removeSkill = (skillName) => {
-    setProfile({
-      ...profile,
-      skills: profile.skills.filter((skill) => skill.name !== skillName),
-    })
+  const handleImageClick = () => {
+    if (editMode) {
+      fileInputRef.current?.click()
+    }
   }
 
   return (
@@ -172,663 +101,339 @@ const ProfilePage = () => {
         <div className="absolute top-0 right-0 w-1/3 h-1/4 bg-gradient-to-b from-secondary/5 to-transparent rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-1/4 h-1/3 bg-gradient-to-t from-secondary/5 to-transparent rounded-full blur-[150px] pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-8">
           {/* Profile Header Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-              <div className="h-32 bg-gradient-to-r from-secondary/20 to-secondary/5 relative">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="absolute top-4 right-4 text-white bg-black/20 hover:bg-black/30"
-                >
-                  <Edit className="h-4 w-4 mr-2" /> Edit Cover
-                </Button>
-              </div>
-              
-              <CardContent className="p-6 relative">
-                {/* Avatar */}
-                <div className="absolute -top-16 left-6 ring-4 ring-card rounded-full">
-                  <Avatar className="h-24 w-24 border-4 border-card">
-                    <AvatarImage src={profile.personalInfo.avatar} alt={profile.personalInfo.name} />
-                    <AvatarFallback className="bg-muted text-text text-2xl">
-                      {profile.personalInfo.name.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                
-                <div className="mt-10 sm:mt-0 sm:ml-32 flex flex-col sm:flex-row justify-between">
-                  <div>
-                    {editMode.personalInfo ? (
-                      <div className="space-y-4 max-w-md">
-                        <Input 
-                          value={profile.personalInfo.name} 
-                          onChange={(e) => setProfile({
-                            ...profile,
-                            personalInfo: {
-                              ...profile.personalInfo,
-                              name: e.target.value
-                            }
-                          })}
-                          className="bg-muted border-border text-text"
-                        />
-                        <Input 
-                          value={profile.personalInfo.role} 
-                          onChange={(e) => setProfile({
-                            ...profile,
-                            personalInfo: {
-                              ...profile.personalInfo,
-                              role: e.target.value
-                            }
-                          })}
-                          className="bg-muted border-border text-text"
-                        />
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            onClick={() => toggleEditMode("personalInfo")}
-                            className="border-border text-text hover:bg-muted"
-                          >
-                            Cancel
-                          </Button>
-                          <PrimaryButton onClick={() => toggleEditMode("personalInfo")}>
-                            <Save className="h-4 w-4 mr-2" /> Save Changes
-                          </PrimaryButton>
+            <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-xl rounded-xl overflow-hidden">
+              <CardContent className="p-8">
+                {/* Profile Section */}
+                <div className="flex flex-col lg:flex-row lg:items-start space-y-6 lg:space-y-0 lg:space-x-8 mb-8">
+                  {/* Avatar Section */}
+                  <div className="flex flex-col items-center lg:items-start">
+                    <div className="relative">
+                      <Avatar className="h-32 w-32 cursor-pointer" onClick={handleImageClick}>
+                        <AvatarImage src={editMode ? tempPersonalInfo.avatar : profile.personalInfo.avatar} alt={profile.personalInfo.name} />
+                        <AvatarFallback className="bg-muted text-text text-3xl">
+                          {profile.personalInfo.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      {editMode && (
+                        <Button 
+                          size="sm" 
+                          onClick={handleImageClick}
+                          className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full p-0 bg-secondary hover:bg-secondary/90"
+                        >
+                          <Camera className="h-5 w-5" />
+                        </Button>
+                      )}
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                    </div>
+                    {editMode && (
+                      <p className="text-xs text-text-muted mt-2 text-center">Click to change photo</p>
+                    )}
+                  </div>
+                  
+                  {/* Profile Info */}
+                  <div className="flex-1 space-y-6">
+                    {editMode ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-text-muted mb-2">Full Name</label>
+                            <Input 
+                              name="name"
+                              value={tempPersonalInfo.name} 
+                              onChange={handlePersonalInfoChange}
+                              className="bg-muted border-border text-text"
+                              placeholder="Your name"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-text-muted mb-2">Email</label>
+                            <Input 
+                              name="email"
+                              type="email"
+                              value={tempPersonalInfo.email} 
+                              onChange={handlePersonalInfoChange}
+                              className="bg-muted border-border text-text"
+                              placeholder="Your email"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-text-muted mb-2">Location</label>
+                          <Input 
+                            name="location"
+                            value={tempPersonalInfo.location} 
+                            onChange={handlePersonalInfoChange}
+                            className="bg-muted border-border text-text"
+                            placeholder="Your location"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-text-muted mb-2">Bio</label>
+                          <Textarea 
+                            name="bio"
+                            value={tempPersonalInfo.bio} 
+                            onChange={handlePersonalInfoChange}
+                            className="bg-muted border-border text-text min-h-[80px]"
+                            placeholder="Tell us about yourself..."
+                          />
                         </div>
                       </div>
                     ) : (
                       <>
-                        <h2 className="text-2xl font-bold text-text">{profile.personalInfo.name}</h2>
-                        <p className="text-secondary">{profile.personalInfo.role}</p>
-                        <div className="flex flex-wrap gap-y-2 mt-2">
-                          <div className="flex items-center mr-4 text-text-muted">
-                            <Mail className="h-4 w-4 mr-1" />
-                            <span className="text-sm">{profile.personalInfo.email}</span>
-                          </div>
-                          <div className="flex items-center mr-4 text-text-muted">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span className="text-sm">{profile.personalInfo.location}</span>
-                          </div>
-                          <div className="flex items-center text-text-muted">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            <span className="text-sm">Joined {profile.personalInfo.joinDate}</span>
+                        <div>
+                          <h2 className="text-3xl font-bold text-text mb-2">{profile.personalInfo.name}</h2>
+                          <p className="text-text-muted mb-4">{profile.personalInfo.bio}</p>
+                          
+                          <div className="flex flex-wrap gap-4 text-sm text-text-muted">
+                            <div className="flex items-center">
+                              <Mail className="h-4 w-4 mr-2" />
+                              <span>{profile.personalInfo.email}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 mr-2" />
+                              <span>{profile.personalInfo.location}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              <span>Joined {profile.personalInfo.joinDate}</span>
+                            </div>
                           </div>
                         </div>
                       </>
                     )}
+                    
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3 pt-4">
+                      {editMode ? (
+                        <>
+                          <PrimaryButton onClick={toggleEditMode}>
+                            <Save className="h-4 w-4 mr-2" /> Save Changes
+                          </PrimaryButton>
+                          <Button 
+                            variant="outline" 
+                            onClick={toggleEditMode}
+                            className="border-border text-text hover:bg-muted"
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button 
+                            variant="outline" 
+                            onClick={toggleEditMode}
+                            className="border-border text-text hover:bg-muted"
+                          >
+                            <Edit className="h-4 w-4 mr-2" /> Edit Profile
+                          </Button>
+                          <Button 
+                            onClick={handleLogout}
+                            variant="outline" 
+                            className="border-border text-accent hover:text-accent/80"
+                          >
+                            <LogOut className="h-4 w-4 mr-2" /> Logout
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Stats Overview Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-xl rounded-xl overflow-hidden">
+              <CardContent className="p-8">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-text mb-2">Performance Overview</h2>
+                  <p className="text-text-muted">Track your learning progress and achievements</p>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Doubt Asking Streak */}
+                  <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl p-6 border border-orange-500/20 hover:shadow-lg transition-all duration-300">
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">🔥</div>
+                      <h3 className="text-2xl font-bold text-orange-400 mb-2">{profile.doubtStreak.current} Days</h3>
+                      <p className="text-text-muted mb-4">Asking Streak</p>
+                      
+                      <div className="space-y-3 text-sm">
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <div className="font-medium text-text">Current Streak</div>
+                          <div className="text-orange-400 font-bold">{profile.doubtStreak.current} days</div>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <div className="font-medium text-text">Longest Streak</div>
+                          <div className="text-secondary font-bold">{profile.doubtStreak.longest} days</div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-text-muted mt-4">
+                        Keep asking questions daily!
+                      </p>
+                    </div>
                   </div>
                   
-                  {!editMode.personalInfo && (
-                    <div className="mt-4 sm:mt-0 flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => toggleEditMode("personalInfo")}
-                        className="border-border text-text hover:bg-muted"
-                      >
-                        <Edit className="h-4 w-4 mr-2" /> Edit Profile
-                      </Button>
-
-                      <Button 
-                        onClick={handleLogout}
-                        variant="outline" 
-                        className="border-border text-accent hover:text-accent/80 flex items-center"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Logout
-                      </Button>
+                  {/* Doubts Solved */}
+                  <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-xl p-6 border border-green-500/20 hover:shadow-lg transition-all duration-300">
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">✅</div>
+                      <h3 className="text-2xl font-bold text-green-400 mb-2">{profile.stats.doubtsSolved}</h3>
+                      <p className="text-text-muted mb-4">Doubts Solved</p>
+                      
+                      <div className="space-y-3 text-sm">
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <div className="font-medium text-text">Total Doubts</div>
+                          <div className="text-text font-bold">{profile.stats.totalDoubts}</div>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <div className="font-medium text-text">Success Rate</div>
+                          <div className="text-green-400 font-bold">
+                            {Math.round((profile.stats.doubtsSolved / profile.stats.totalDoubts) * 100)}%
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-text-muted mt-4">
+                        Great problem-solving progress!
+                      </p>
                     </div>
-                  )}
-                </div>
-                
-                {/* Bio Section */}
-                <div className="mt-6">
-                  {editMode.bio ? (
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-6 border border-blue-500/20 hover:shadow-lg transition-all duration-300">
                     <div className="space-y-4">
-                      <Textarea 
-                        value={profile.personalInfo.bio} 
-                        onChange={(e) => setProfile({
-                          ...profile,
-                          personalInfo: {
-                            ...profile.personalInfo,
-                            bio: e.target.value
-                          }
-                        })}
-                        className="bg-muted border-border text-text min-h-[100px]"
-                      />
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => toggleEditMode("bio")}
-                          className="border-border text-text hover:bg-muted"
-                        >
-                          Cancel
-                        </Button>
-                        <PrimaryButton onClick={() => toggleEditMode("bio")}>
-                          <Save className="h-4 w-4 mr-2" /> Save Changes
-                        </PrimaryButton>
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">⚡</div>
+                        <h4 className="text-lg font-semibold text-text mb-4">Quick Actions</h4>
+                      </div>
+                      
+                      <Button className="w-full bg-secondary hover:bg-secondary/90 text-white">
+                        <User className="h-4 w-4 mr-2" />
+                        Ask a Question
+                      </Button>
+                      <Button variant="outline" className="w-full border-border text-text hover:bg-muted">
+                        <Edit className="h-4 w-4 mr-2" />
+                        View My Doubts
+                      </Button>
+                      
+                      <div className="pt-4 border-t border-border/30">
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <div className="text-sm text-text-muted text-center">
+                            <p className="font-medium text-text">Last Activity</p>
+                            <p className="text-secondary font-bold">{new Date(profile.doubtStreak.lastDoubtDate).toLocaleDateString()}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex justify-between">
-                      <p className="text-text-muted">{profile.personalInfo.bio}</p>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => toggleEditMode("bio")}
-                        className="text-text-muted hover:text-text hover:bg-muted h-8"
-                      >
-                        <Edit className="h-3 w-3 mr-1" /> Edit
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Stats Row */}
-                <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-muted rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-text">{profile.stats.problemsSolved}</div>
-                    <div className="text-sm text-text-muted">Problems Solved</div>
                   </div>
-                  <div className="bg-muted rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-secondary">{profile.stats.streak} days</div>
-                    <div className="text-sm text-text-muted">Current Streak</div>
-                  </div>
-                  <div className="bg-muted rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-text">#{profile.stats.rank}</div>
-                    <div className="text-sm text-text-muted">Global Rank</div>
-                  </div>
-                  <div className="bg-muted rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-text">{profile.stats.contributions}</div>
-                    <div className="text-sm text-text-muted">Contributions</div>
-                  </div>
-                </div>
-                
-                {/* Social Links */}
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <a href={`https://${profile.socialLinks.github}`} target="_blank" rel="noopener noreferrer" className="flex items-center bg-muted px-3 py-1.5 rounded-full text-text-muted hover:text-secondary transition-colors">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    <span className="text-sm">GitHub</span>
-                  </a>
-                  <a href={`https://${profile.socialLinks.twitter}`} target="_blank" rel="noopener noreferrer" className="flex items-center bg-muted px-3 py-1.5 rounded-full text-text-muted hover:text-secondary transition-colors">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    <span className="text-sm">Twitter</span>
-                  </a>
-                  <a href={`https://${profile.socialLinks.linkedin}`} target="_blank" rel="noopener noreferrer" className="flex items-center bg-muted px-3 py-1.5 rounded-full text-text-muted hover:text-secondary transition-colors">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    <span className="text-sm">LinkedIn</span>
-                  </a>
-                  <a href={`https://${profile.socialLinks.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center bg-muted px-3 py-1.5 rounded-full text-text-muted hover:text-secondary transition-colors">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    <span className="text-sm">Website</span>
-                  </a>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Tabs Navigation */}
-          <Tabs 
-            defaultValue="overview" 
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="mt-8"
+          {/* Improvement Areas Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
           >
-            <TabsList className="bg-card border border-border grid grid-cols-5 h-auto p-1 w-full sm:w-auto">
-              <TabsTrigger 
-                value="overview" 
-                className="py-2.5 data-[state=active]:bg-secondary data-[state=active]:text-white"
-              >
-                <User className="h-4 w-4 mr-2" /> Overview
-              </TabsTrigger>
-              <TabsTrigger 
-                value="education" 
-                className="py-2.5 data-[state=active]:bg-secondary data-[state=active]:text-white"
-              >
-                <GraduationCap className="h-4 w-4 mr-2" /> Education
-              </TabsTrigger>
-              <TabsTrigger 
-                value="experience" 
-                className="py-2.5 data-[state=active]:bg-secondary data-[state=active]:text-white"
-              >
-                <Briefcase className="h-4 w-4 mr-2" /> Experience
-              </TabsTrigger>
-              <TabsTrigger 
-                value="achievements" 
-                className="py-2.5 data-[state=active]:bg-secondary data-[state=active]:text-white"
-              >
-                <Award className="h-4 w-4 mr-2" /> Achievements
-              </TabsTrigger>
-              <TabsTrigger 
-                value="settings" 
-                className="py-2.5 data-[state=active]:bg-secondary data-[state=active]:text-white"
-              >
-                <Settings className="h-4 w-4 mr-2" /> Settings
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Overview Tab */}
-            <TabsContent value="overview">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Left Column - 2/3 width */}
-                <div className="md:col-span-2 space-y-6">
-                  {/* Skills Card */}
-                  <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-                    <CardHeader className="border-b border-border/50">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-xl flex items-center text-text">
-                          <Code className="mr-2 h-5 w-5 text-secondary" /> Skills
-                        </CardTitle>
-                        {!editMode.skills && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => toggleEditMode("skills")}
-                            className="border-border text-text hover:bg-muted"
-                          >
-                            <Edit className="h-4 w-4 mr-2" /> Edit Skills
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      {editMode.skills ? (
-                        <div className="space-y-6">
-                          {profile.skills.map((skill, index) => (
-                            <div key={index} className="space-y-2">
-                              <div className="flex gap-4">
-                                <Input 
-                                  value={skill.name} 
-                                  onChange={(e) => {
-                                    const newSkills = [...profile.skills];
-                                    newSkills[index].name = e.target.value;
-                                    setProfile({...profile, skills: newSkills});
-                                  }}
-                                  className="bg-muted border-border text-text"
-                                  placeholder="Skill name"
-                                />
-                                <Input 
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  value={skill.level} 
-                                  onChange={(e) => {
-                                    const newSkills = [...profile.skills];
-                                    newSkills[index].level = parseInt(e.target.value) || 0;
-                                    setProfile({...profile, skills: newSkills});
-                                  }}
-                                  className="bg-muted border-border text-text w-24"
-                                  placeholder="Level"
-                                />
-                              </div>
-                              <Progress 
-                                value={skill.level} 
-                                className="h-2.5 bg-muted" 
-                                style={{
-                                  "--progress-background": skill.color || "var(--secondary)"
-                                }}
-                              />
+            <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-xl rounded-xl overflow-hidden">
+              <CardContent className="p-8">
+                <div className="mb-6">
+                  <div className="flex items-center mb-2">
+                    <TrendingDown className="h-6 w-6 text-red-400 mr-3" />
+                    <h2 className="text-2xl font-bold text-text">Key Areas to Improve</h2>
+                  </div>
+                  <p className="text-text-muted">Focus on these topics to boost your success rate</p>
+                </div>
+                
+                <div className="bg-gradient-to-br from-red-500/5 to-red-600/3 rounded-xl p-6 border border-red-500/10">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {profile.improvementAreas.map((area, index) => (
+                        <div key={index} className="bg-muted/50 rounded-lg p-4 border border-border/30">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-text mb-1">{area.topic}</h4>
+                              <p className="text-sm text-text-muted">{area.doubtsCount} doubts posted</p>
                             </div>
-                          ))}
+                            <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              area.priority === 'high' ? 'bg-red-500/20 text-red-400' :
+                              area.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-blue-500/20 text-blue-400'
+                            }`}>
+                              {area.priority === 'high' && <AlertTriangle className="h-3 w-3 mr-1" />}
+                              {area.priority.toUpperCase()}
+                            </div>
+                          </div>
                           
-                          <div className="flex space-x-2 pt-4">
-                            <Button 
-                              variant="outline" 
-                              onClick={() => toggleEditMode("skills")}
-                              className="border-border text-text hover:bg-muted"
-                            >
-                              Cancel
-                            </Button>
-                            <PrimaryButton onClick={() => toggleEditMode("skills")}>
-                              <Save className="h-4 w-4 mr-2" /> Save Changes
-                            </PrimaryButton>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-6">
-                          {profile.skills.map((skill, index) => (
-                            <div key={index} className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <div className="text-text">{skill.name}</div>
-                                <div className="text-text-muted text-sm">{skill.level}%</div>
-                              </div>
-                              <Progress 
-                                value={skill.level} 
-                                className="h-2.5 bg-muted" 
-                                style={{
-                                  "--progress-background": skill.color || "var(--secondary)"
-                                }}
-                              />
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-text-muted">Success Rate</span>
+                              <span className={`font-bold ${
+                                area.successRate < 50 ? 'text-red-400' :
+                                area.successRate < 70 ? 'text-yellow-400' :
+                                'text-green-400'
+                              }`}>
+                                {area.successRate}%
+                              </span>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Recent Activity */}
-                  <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-                    <CardHeader className="border-b border-border/50">
-                      <CardTitle className="text-xl flex items-center text-text">
-                        <Clock className="mr-2 h-5 w-5 text-secondary" /> Recent Activity
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-border">
-                        {[
-                          { type: "doubt", title: "Asked question about React hooks", date: "2 days ago", icon: MessageSquare },
-                          { type: "solution", title: "Submitted solution for Array problem", date: "1 week ago", icon: CheckCircle },
-                          { type: "achievement", title: "Earned 'Problem Solver' badge", date: "2 weeks ago", icon: Award },
-                          { type: "contribution", title: "Answered question about Python", date: "1 month ago", icon: Star },
-                        ].map((activity, i) => (
-                          <div key={i} className="p-4 flex items-start">
-                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mr-3">
-                              {React.createElement(activity.icon, { className: "w-4 h-4 text-secondary" })}
+                            
+                            <div className="w-full bg-muted rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  area.successRate < 50 ? 'bg-red-400' :
+                                  area.successRate < 70 ? 'bg-yellow-400' :
+                                  'bg-green-400'
+                                }`}
+                                style={{ width: `${area.successRate}%` }}
+                              ></div>
                             </div>
-                            <div>
-                              <p className="text-sm text-text">{activity.title}</p>
-                              <p className="text-xs text-text-muted mt-1">{activity.date}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Right Column */}
-                <div className="space-y-6">
-                  {/* Courses Card */}
-                  <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-                    <CardHeader className="border-b border-border/50">
-                      <CardTitle className="text-xl flex items-center text-text">
-                        <Book className="mr-2 h-5 w-5 text-secondary" /> Courses
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-border">
-                        {profile.courses.map((course) => (
-                          <div key={course.id} className="p-4">
-                            <h3 className="font-medium text-text">{course.title}</h3>
-                            <p className="text-sm text-text-muted">{course.provider}</p>
-                            <div className="flex justify-between items-center mt-2">
-                              <span className="text-xs text-text-muted">{course.completion}</span>
-                              {course.certificate && (
-                                <Badge className="bg-secondary/20 text-secondary border border-secondary/30">
-                                  Certificate
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Learning Path */}
-                  <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-                    <CardHeader className="border-b border-border/50">
-                      <CardTitle className="text-xl flex items-center text-text">
-                        <FileText className="mr-2 h-5 w-5 text-secondary" /> Learning Path
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <div className="space-y-4">
-                        <div className="relative pl-6">
-                          <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-secondary"></div>
-                          <div className="absolute left-1.5 top-4 bottom-0 w-px bg-border h-full"></div>
-                          <div>
-                            <h3 className="font-medium text-text">Data Structures</h3>
-                            <p className="text-sm text-text-muted">Completed</p>
-                          </div>
-                        </div>
-                        <div className="relative pl-6">
-                          <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-secondary"></div>
-                          <div className="absolute left-1.5 top-4 bottom-0 w-px bg-border h-full"></div>
-                          <div>
-                            <h3 className="font-medium text-text">Algorithms</h3>
-                            <p className="text-sm text-text-muted">In Progress - 75%</p>
-                            <Progress value={75} className="h-1.5 mt-2 bg-muted" />
-                          </div>
-                        </div>
-                        <div className="relative pl-6">
-                          <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-muted"></div>
-                          <div className="absolute left-1.5 top-4 bottom-0 w-px bg-border h-full"></div>
-                          <div>
-                            <h3 className="font-medium text-text-muted">System Design</h3>
-                            <p className="text-sm text-text-muted">Upcoming</p>
-                          </div>
-                        </div>
-                        <div className="relative pl-6">
-                          <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-muted"></div>
-                          <div>
-                            <h3 className="font-medium text-text-muted">Machine Learning</h3>
-                            <p className="text-sm text-text-muted">Unlocks after System Design</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="education">
-              <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-                <CardHeader className="border-b border-border/50">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-xl flex items-center text-text">
-                      <GraduationCap className="mr-2 h-5 w-5 text-secondary" /> Education
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-border text-text hover:bg-muted"
-                    >
-                      <Edit className="h-4 w-4 mr-2" /> Edit Education
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-8">
-                    {profile.education.map((edu, index) => (
-                      <div key={edu.id} className="relative">
-                        {/* Timeline dot and line */}
-                        <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
-                          <div className="w-4 h-4 rounded-full bg-secondary"></div>
-                          {index < profile.education.length - 1 && (
-                            <div className="w-px flex-1 bg-border"></div>
-                          )}
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="ml-8 bg-card/50 p-4 rounded-lg border border-border/50">
-                          <h3 className="text-lg font-medium text-text">{edu.institution}</h3>
-                          <p className="text-secondary">{edu.degree}</p>
-                          <div className="flex items-center mt-1 mb-2 text-text-muted">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            <span>{edu.period}</span>
-                          </div>
-                          <p className="text-text">{edu.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="experience">
-              <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-                <CardHeader className="border-b border-border/50">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-xl flex items-center text-text">
-                      <Briefcase className="mr-2 h-5 w-5 text-secondary" /> Work Experience
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-border text-text hover:bg-muted"
-                    >
-                      <Edit className="h-4 w-4 mr-2" /> Edit Experience
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-8">
-                    {profile.experience.map((exp, index) => (
-                      <div key={exp.id} className="relative">
-                        {/* Timeline dot and line */}
-                        <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
-                          <div className="w-4 h-4 rounded-full bg-secondary"></div>
-                          {index < profile.experience.length - 1 && (
-                            <div className="w-px flex-1 bg-border"></div>
-                          )}
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="ml-8 bg-card/50 p-4 rounded-lg border border-border/50">
-                          <h3 className="text-lg font-medium text-text">{exp.company}</h3>
-                          <p className="text-secondary">{exp.position || exp.role}</p>
-                          <div className="flex items-center mt-1 mb-2 text-text-muted">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            <span>{exp.period}</span>
-                          </div>
-                          <p className="text-text">{exp.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="achievements">
-              <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg rounded-lg overflow-hidden">
-                <CardHeader className="border-b border-border/50">
-                  <CardTitle className="text-xl flex items-center text-text">
-                    <Award className="mr-2 h-5 w-5 text-secondary" /> Achievements & Certifications
-                  </CardTitle>
-                  <CardDescription className="text-text-muted">
-                    Your noteworthy accomplishments and certifications
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {profile.achievements.map((achievement) => (
-                      <motion.div
-                        key={achievement.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Card className="h-full bg-card border border-border hover:shadow-md transition-shadow duration-300">
-                          <CardContent className="p-6">
-                            <div className="flex justify-between items-start">
-                              <h3 className="text-xl font-bold text-secondary">{achievement.title}</h3>
-                              <Badge className="bg-secondary/10 text-secondary">{achievement.date}</Badge>
-                            </div>
-                            <p className="mt-3 text-text-muted">{achievement.description}</p>
-                            <div className="mt-4 flex justify-end">
-                              <Button variant="ghost" size="sm" className="text-secondary">
-                                <Edit className="mr-2 h-4 w-4" /> Edit
+                            
+                            <div className="pt-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="w-full text-xs border-border text-text hover:bg-muted"
+                              >
+                                Practice {area.topic}
                               </Button>
                             </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="settings">
-              <Card className="bg-card shadow-lg rounded-lg overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-primary to-card text-white">
-                  <CardTitle className="text-xl flex items-center">
-                    <Settings className="mr-2 h-5 w-5" /> Profile Settings
-                  </CardTitle>
-                  <CardDescription className="text-text-muted">
-                    Manage your account settings and preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-8">
-                    <div>
-                      <h3 className="text-lg font-medium text-text mb-4">Account Settings</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between py-3 border-b border-border">
-                          <div>
-                            <h4 className="font-medium text-text">Email Notifications</h4>
-                            <p className="text-sm text-text-muted">Receive email updates about your account</p>
                           </div>
-                          <Switch />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-text-muted mb-1">Email Address</label>
-                          <Input 
-                            type="email" 
-                            value={profile.personalInfo.email} 
-                            className="bg-muted border-border text-text"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-text-muted mb-1">Profile Visibility</label>
-                          <Select defaultValue="public">
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Who can see your profile" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="public">Public</SelectItem>
-                              <SelectItem value="students">Students Only</SelectItem>
-                              <SelectItem value="connections">Connections Only</SelectItem>
-                              <SelectItem value="private">Private</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-
-                    <div>
-                      <h3 className="text-lg font-medium text-text mb-4">Password</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-text-muted mb-1">Current Password</label>
-                          <Input type="password" placeholder="Enter your current password" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-text-muted mb-1">New Password</label>
-                          <Input type="password" placeholder="Enter your new password" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-text-muted mb-1">Confirm New Password</label>
-                          <Input type="password" placeholder="Confirm your new password" />
-                        </div>
-                        <Button className="bg-secondary hover:bg-secondary/90 text-white">
-                          Update Password
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-medium text-red-600 mb-4">Danger Zone</h3>
-                      <div className="border border-destructive/20 rounded-md p-4 bg-destructive/5">
-                        <h4 className="text-base font-medium text-destructive mb-2">Delete Account</h4>
-                        <p className="text-destructive/80 mb-4">
-                          Once you delete your account, there is no going back. Please be certain.
-                        </p>
-                        <Button variant="destructive">Delete Account</Button>
-                      </div>
+                    
+                  <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-center text-sm text-text-muted">
+                      <AlertTriangle className="h-4 w-4 mr-2 text-yellow-400" />
+                      <span>Focus on high-priority areas first. Practice regularly to improve your success rate!</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </>
