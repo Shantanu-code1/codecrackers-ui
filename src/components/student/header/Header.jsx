@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from "framer-motion"
-import { Code, LogIn, LogOut } from 'lucide-react'
+import { Code, LogIn, LogOut, Menu, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import signuporloginStore from '@/zustand/login-signup/store'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
@@ -12,6 +12,7 @@ const Header = () => {
   const logout = signuporloginStore(state => state.logout);
   const navigate = useNavigate();
   const location = useLocation(); // Get current route
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Determine user role from store or use fallback
   const userRole = userData?.role || "ROLE_STUDENT"; // Fallback to student if no role
@@ -24,6 +25,10 @@ const Header = () => {
   // Function to check if a link is active
   const isActive = (path) => {
     return location.pathname.includes(path.toLowerCase());
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   console.log("Current user data:", userData); // Add this to debug
@@ -124,13 +129,9 @@ const Header = () => {
               variant="ghost"
               size="sm"
               className="text-[#E5E7EB] hover:text-[#0070F3] hover:bg-[#0070F3]/10 p-2"
-              onClick={() => {
-                // You can add mobile menu toggle logic here
-              }}
+              onClick={toggleMobileMenu}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </motion.div>
         </div>
@@ -140,9 +141,9 @@ const Header = () => {
       <motion.div 
         className="md:hidden fixed top-20 left-4 right-4 bg-gradient-to-r from-[#161B22]/95 to-[#1A2233]/95 backdrop-blur-md border border-[#30363D]/30 rounded-2xl shadow-lg"
         initial={{ height: 0, opacity: 0 }}
-        animate={{ height: "auto", opacity: 1 }}
+        animate={{ height: isMobileMenuOpen ? "auto" : 0, opacity: isMobileMenuOpen ? 1 : 0 }}
         exit={{ height: 0, opacity: 0 }}
-        style={{ display: "none" }} // Toggle this based on mobile menu state
+        style={{ display: isMobileMenuOpen ? "block" : "none" }}
       >
         <div className="px-4 py-3 space-y-2">
           {userRole === "ROLE_TEACHER" ? (
@@ -159,6 +160,7 @@ const Header = () => {
                       ? "text-[#0070F3] bg-[#0070F3]/10 font-semibold border border-[#0070F3]/30" 
                       : "text-[#E5E7EB] hover:text-[#0070F3] hover:bg-[#0070F3]/5"
                   }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item}
                 </Link>
@@ -175,6 +177,7 @@ const Header = () => {
                       ? "text-[#0070F3] bg-[#0070F3]/10 font-semibold border border-[#0070F3]/30" 
                       : "text-[#E5E7EB] hover:text-[#0070F3] hover:bg-[#0070F3]/5"
                   }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item}
                 </Link>
