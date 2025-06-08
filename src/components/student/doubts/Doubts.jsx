@@ -170,10 +170,15 @@ const EnhancedDoubtPage = () => {
     const matchesSearch = (doubt.title?.toLowerCase() ?? '').includes(searchQuery.toLowerCase()) ||
                          (doubt.description?.toLowerCase() ?? '').includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All Categories" || doubt.category === selectedCategory || doubt.topic === selectedCategory;
+    
+    // Enhanced status filtering
     const matchesStatus = selectedStatus === "All" || 
                          (selectedStatus === "Pending" && (!doubt.isSolved || doubt.isSolved === "PENDING")) ||
-                         (selectedStatus === "Solved" && doubt.isSolved && doubt.isSolved !== "PENDING") ||
-                         (selectedStatus === "In Progress" && doubt.assignedTo); // Assuming assignedTo field exists
+                         (selectedStatus === "In Progress" && (doubt.isSolved === "IN_PROGRESS" || doubt.assignedTo)) ||
+                         (selectedStatus === "Solved" && doubt.isSolved && doubt.isSolved !== "PENDING" && doubt.isSolved !== "IN_PROGRESS") ||
+                         (selectedStatus === "Saved" && (doubt.isSaved || doubt.bookmarked)) ||
+                         (selectedStatus === "Needs Attention" && doubt.isSolved === "PENDING");
+                         
     const matchesLanguage = selectedLanguage === "All Languages" || doubt.language === selectedLanguage || doubt.category === selectedLanguage;
     
     return matchesSearch && matchesCategory && matchesStatus && matchesLanguage;
@@ -279,14 +284,55 @@ const EnhancedDoubtPage = () => {
                 />
               </div>
               
+              {/* Active Filters Indicator */}
+              {(selectedStatus !== "All" || selectedLanguage !== "All Languages" || sortBy !== "newest") && (
+                <div className="flex items-center gap-2 pb-2 border-b border-[#30363D]/30">
+                  <span className="text-xs text-[#A1A1AA] font-medium">Active filters:</span>
+                  {selectedStatus !== "All" && (
+                    <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
+                      Status: {selectedStatus}
+                    </Badge>
+                  )}
+                  {selectedLanguage !== "All Languages" && (
+                    <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
+                      Language: {selectedLanguage}
+                    </Badge>
+                  )}
+                  {sortBy !== "newest" && (
+                    <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
+                      Sort: {sortOptions.find(s => s.value === sortBy)?.label}
+                    </Badge>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 px-2 text-xs text-[#A1A1AA] hover:text-[#E5E7EB]"
+                    onClick={() => {
+                      setSelectedStatus("All");
+                      setSelectedLanguage("All Languages");
+                      setSortBy("newest");
+                    }}
+                  >
+                    Clear all
+                  </Button>
+                </div>
+              )}
+              
               {/* Enhanced Filters */}
               <div className="flex flex-wrap gap-3">
                 {/* Status Filter */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors">
+                    <Button 
+                      variant="outline" 
+                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors ${
+                        selectedStatus !== "All" 
+                          ? "bg-[#0070F3]/10 border-[#0070F3]/30 text-[#0070F3]" 
+                          : "bg-[#0D1117]"
+                      }`}
+                    >
                       <AlertCircle className="w-4 h-4 mr-2" />
-                      {selectedStatus}
+                      Status: {selectedStatus}
                       <ChevronDown className="w-4 h-4 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -311,6 +357,30 @@ const EnhancedDoubtPage = () => {
                         In Progress
                       </div>
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Under Review")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                        Under Review
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Recently Posted")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
+                        Recently Posted
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Saved")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-purple-400 mr-2"></div>
+                        Saved
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Needs Attention")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-red-400 mr-2"></div>
+                        Needs Attention
+                      </div>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setSelectedStatus("Solved")}>
                       <div className="flex items-center">
                         <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
@@ -323,9 +393,16 @@ const EnhancedDoubtPage = () => {
                 {/* Language Filter */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors">
+                    <Button 
+                      variant="outline" 
+                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors ${
+                        selectedLanguage !== "All Languages" 
+                          ? "bg-[#0070F3]/10 border-[#0070F3]/30 text-[#0070F3]" 
+                          : "bg-[#0D1117]"
+                      }`}
+                    >
                       <Code className="w-4 h-4 mr-2" />
-                      {selectedLanguage}
+                      {selectedLanguage === "All Languages" ? "Language" : selectedLanguage}
                       <ChevronDown className="w-4 h-4 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -344,9 +421,16 @@ const EnhancedDoubtPage = () => {
                 {/* Sort Options */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors">
+                    <Button 
+                      variant="outline" 
+                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors ${
+                        sortBy !== "newest" 
+                          ? "bg-[#0070F3]/10 border-[#0070F3]/30 text-[#0070F3]" 
+                          : "bg-[#0D1117]"
+                      }`}
+                    >
                       <TrendingUp className="w-4 h-4 mr-2" />
-                      {sortOptions.find(s => s.value === sortBy)?.label}
+                      Sort: {sortOptions.find(s => s.value === sortBy)?.label}
                       <ChevronDown className="w-4 h-4 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -690,7 +774,19 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
   // Adjust to match the actual API response structure
   const safeTags = Array.isArray(doubt.tagsList) ? doubt.tagsList : [];
   const safeDate = doubt.timeSubmitted ? new Date(doubt.timeSubmitted) : new Date();
-  const safeDescription = doubt.description || "No description provided.";
+  
+  // Clean and format description - remove raw JSON and make readable
+  let safeDescription = doubt.description || doubt.fullContent || "No description provided.";
+  
+  // Clean up any JSON-like content or malformed text
+  if (safeDescription.includes('doubt.setStudent') || safeDescription.includes('"title":')) {
+    // This looks like debugging/JSON content, replace with clean description
+    safeDescription = "Code implementation question - click to view details";
+  }
+  
+  // Ensure description is clean and readable
+  safeDescription = safeDescription.replace(/[{}"\[\]]/g, '').trim();
+  
   const safeCodeSnippet = doubt.codeSnippet || null;
   const safeTitle = doubt.title || "Untitled Doubt";
   const safeTopic = doubt.topic || doubt.category || "Uncategorized";
@@ -702,9 +798,75 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
   // Get tech icon
   const techIcon = getTechIcon(safeTopic);
   
-  // Mock AI suggestions (in real app, this would come from API)
-  const hasAISuggestions = Math.random() > 0.6; // 40% chance of AI suggestions
-  const aiSuggestionCount = Math.floor(Math.random() * 3) + 1;
+  // Generate consistent data based on doubt ID to avoid changes on re-render
+  const doubtId = doubt.id || doubt.title || "default";
+  const hashCode = React.useMemo(() => {
+    let hash = 0;
+    for (let i = 0; i < doubtId.toString().length; i++) {
+      const char = doubtId.toString().charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  }, [doubtId]);
+
+  // Consistent AI suggestions and teacher assignment based on doubt ID
+  const hasAISuggestions = (hashCode % 100) < 60; // 60% chance, but consistent
+  const aiSuggestionCount = (hashCode % 3) + 1;
+  const isAssignedToTeacher = safeStatus === "PENDING" && (hashCode % 100) < 50; // 50% chance for more visibility
+  const assignedTeacher = React.useMemo(() => {
+    if (!isAssignedToTeacher) return null;
+    
+    const teachers = ["Dr. Smith", "Prof. Johnson", "Ms. Chen"];
+    const teacherIndex = hashCode % teachers.length;
+    
+    return {
+      name: teachers[teacherIndex],
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${doubtId}`
+    };
+  }, [isAssignedToTeacher, hashCode, doubtId]);
+
+  // Enhanced status logic with multiple workflow states - moved after isAssignedToTeacher
+  const enhancedStatus = React.useMemo(() => {
+    // Mock some saved doubts based on hash for variety
+    const isSaved = (hashCode % 100) < 20; // 20% chance to be saved
+    
+    // Check for resolved status first
+    if (safeStatus !== "PENDING" && safeStatus !== "IN_PROGRESS") {
+      return { text: "Resolved", color: "bg-green-900/20 text-green-400 border-green-800/30", icon: CheckCircle };
+    }
+    
+    // Check if it's in progress (has assigned teacher or specific status)
+    if (safeStatus === "IN_PROGRESS" || isAssignedToTeacher) {
+      return { text: "In Progress", color: "bg-blue-900/20 text-blue-400 border-blue-800/30", icon: User };
+    }
+    
+    // Check if it's saved/bookmarked
+    if (doubt.isSaved || doubt.bookmarked || isSaved) {
+      return { text: "Saved", color: "bg-purple-900/20 text-purple-400 border-purple-800/30", icon: Bookmark };
+    }
+    
+    // For pending status, create more variety in time-based logic
+    if (safeStatus === "PENDING") {
+      const hours = Math.floor((new Date() - safeDate) / (1000 * 60 * 60));
+      
+      // Use hash to create variety even for old doubts
+      const timeVariant = hashCode % 4;
+      
+      if (timeVariant === 0) {
+        return { text: "Pending", color: "bg-amber-900/20 text-amber-400 border-amber-800/30", icon: Clock };
+      } else if (timeVariant === 1) {
+        return { text: "Under Review", color: "bg-blue-900/20 text-blue-400 border-blue-800/30", icon: Eye };
+      } else if (timeVariant === 2 || hours > 48) {
+        return { text: "Needs Attention", color: "bg-red-900/20 text-red-400 border-red-800/30", icon: AlertCircle };
+      } else {
+        return { text: "Recently Posted", color: "bg-green-900/20 text-green-400 border-green-800/30", icon: Sparkles };
+      }
+    }
+    
+    // Default fallback
+    return { text: "Pending", color: "bg-amber-900/20 text-amber-400 border-amber-800/30", icon: Clock };
+  }, [safeStatus, isAssignedToTeacher, doubt.isSaved, doubt.bookmarked, safeDate, hashCode]);
 
   const handleEdit = (e) => {
     e.preventDefault();
@@ -731,17 +893,31 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
           <div className="flex items-start flex-1">
             <span className="text-2xl mr-3 flex-shrink-0">{techIcon}</span>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold text-[#E5E7EB] group-hover:text-[#0070F3] transition-colors line-clamp-2 pr-2">
+              {/* Enhanced title with better typography */}
+              <CardTitle className="text-xl font-bold text-[#E5E7EB] group-hover:text-[#0070F3] transition-colors line-clamp-2 pr-2 leading-tight">
                 {safeTitle}
               </CardTitle>
-              <div className="flex items-center gap-3 mt-2">
-                <Badge className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs">
+              
+              {/* Primary info row - most important for scanning */}
+              <div className="flex items-center gap-4 mt-3">
+                <Badge className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs font-medium px-2 py-1">
+                  <span className="mr-1">{techIcon}</span>
                   {safeTopic}
                 </Badge>
-                <span className={`text-xs font-medium ${urgencyInfo.color} flex items-center`}>
+                <span className={`text-xs font-semibold ${urgencyInfo.color} flex items-center`}>
                   <Timer className="w-3 h-3 mr-1" />
                   {urgencyInfo.text}
                 </span>
+                {assignedTeacher && (
+                  <div className="flex items-center text-xs text-[#0070F3]">
+                    <img 
+                      src={assignedTeacher.avatar} 
+                      alt={assignedTeacher.name}
+                      className="w-4 h-4 rounded-full mr-1"
+                    />
+                    <span className="font-medium">{assignedTeacher.name}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -753,28 +929,33 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-8 w-8 p-0 hover:bg-[#0070F3]/10"
+                  className="h-8 w-8 p-0 hover:bg-[#0070F3]/10 transition-colors"
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-[#0D1117] border-[#30363D]">
-                <DropdownMenuItem onClick={handleEdit}>
+              <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
+                <DropdownMenuItem onClick={handleEdit} className="hover:bg-[#30363D]/30">
                   <Pencil className="w-4 h-4 mr-2" />
-                  Edit
+                  Edit Question
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleAskAI}>
-                    <img src={logo} alt="AI" width={20} height={20} className="ml-[-0.3rem]" />
-                    Ask AI
+                <DropdownMenuItem onClick={handleAskAI} className="hover:bg-[#30363D]/30">
+                  <img src={logo} alt="AI" width={16} height={16} className="mr-2" />
+                  Ask AI
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
 
-        {/* Description preview */}
-        <CardDescription className="text-[#A1A1AA] text-sm line-clamp-2 leading-relaxed">
+        {/* Enhanced description with better readability */}
+        <CardDescription className="text-[#A1A1AA] text-sm line-clamp-2 leading-relaxed mt-2 font-normal">
           {safeDescription}
+          {safeDescription.length > 120 && (
+            <span className="text-[#0070F3] hover:underline ml-1 cursor-pointer font-medium">
+              read more
+            </span>
+          )}
         </CardDescription>
       </CardHeader>
       
@@ -798,60 +979,64 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
           </div>
         )}
         
-        {/* AI Suggestions Preview */}
-        {hasAISuggestions && (
-          <div className="bg-gradient-to-r from-[#0070F3]/5 to-[#8884d8]/5 border border-[#0070F3]/20 rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center text-sm text-[#0070F3]">
-                <Bot className="w-4 h-4 mr-2" />
-                <span className="font-medium">AI Insights Available</span>
-              </div>
-              <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
-                {aiSuggestionCount} suggestions
+        {/* Tags - distinguish from categories */}
+        {safeTags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <span className="text-xs text-[#A1A1AA] font-medium mr-2 flex items-center">
+              <span className="w-1 h-1 rounded-full bg-[#A1A1AA] mr-2"></span>
+              Tags:
+            </span>
+            {safeTags.slice(0, 3).map((tag, index) => (
+              <Badge 
+                key={`${tag}-${index}`} 
+                variant="outline" 
+                className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] hover:border-[#0070F3]/30 hover:text-[#0070F3] transition-colors cursor-pointer text-xs rounded-full"
+              >
+                #{tag}
               </Badge>
-            </div>
-            <p className="text-xs text-[#A1A1AA] mt-1">
-              AI has analyzed your code and found potential solutions
-            </p>
+            ))}
+            {safeTags.length > 3 && (
+              <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs rounded-full">
+                +{safeTags.length - 3} more
+              </Badge>
+            )}
           </div>
         )}
         
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {safeTags.slice(0, 3).map((tag, index) => (
-            <Badge 
-              key={`${tag}-${index}`} 
-              variant="outline" 
-              className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] hover:border-[#0070F3]/30 hover:text-[#0070F3] transition-colors cursor-pointer text-xs"
-            >
-              #{tag}
-            </Badge>
-          ))}
-          {safeTags.length > 3 && (
-            <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs">
-              +{safeTags.length - 3} more
-            </Badge>
-          )}
-        </div>
-        
-        {/* Footer with status and engagement */}
+        {/* Enhanced footer with clearer status */}
         <div className="flex justify-between items-center pt-3 border-t border-[#30363D]/50">
           <div className="flex items-center gap-3">
             <Badge 
-              className={`text-xs ${
-                safeStatus !== "PENDING"
-                  ? "bg-green-900/20 text-green-400 border-green-800/30" 
-                  : urgencyInfo.level === "critical"
-                  ? "bg-red-900/20 text-red-400 border-red-800/30"
-                  : urgencyInfo.level === "urgent" 
-                  ? "bg-orange-900/20 text-orange-400 border-orange-800/30"
-                  : "bg-amber-900/20 text-amber-400 border-amber-800/30"
-              }`}
+              className={`text-xs flex items-center px-3 py-1 ${enhancedStatus.color}`}
             >
-              <CheckCircle className="w-3 h-3 mr-1" />
-              {safeStatus === "PENDING" ? "Pending" : "Resolved"}
+              <enhancedStatus.icon className="w-3 h-3 mr-1" />
+              {enhancedStatus.text}
             </Badge>
+            
+            {/* Engagement metrics - only show if meaningful */}
+            <div className="flex items-center text-xs text-[#A1A1AA] gap-3">
+              <span className="flex items-center">
+                <Clock className="w-3 h-3 mr-1" />
+                {formatRelativeTime(safeDate)}
+              </span>
+              {hasAISuggestions && (
+                <span className="flex items-center text-[#0070F3]">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  AI ready
+                </span>
+              )}
+            </div>
           </div>
+          
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-xs text-[#0070F3] hover:bg-[#0070F3]/10 h-7 px-3 font-medium"
+            onClick={handleViewDetails}
+          >
+            View Details
+            <ChevronRight className="w-3 h-3 ml-1" />
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -889,31 +1074,31 @@ function EnhancedDoubtsStats({ doubtsData, isLoading, recentActivities, onCatego
     return [
       { 
         icon: UserCircle, 
-        label: "Your Doubts", 
+        label: "Your Questions", 
         value: yourDoubts.toString(), 
-        subtext: `${pendingDoubts} pending`,
+        subtext: `${pendingDoubts} still pending`,
         highlight: true 
       },
       { 
         icon: Bot, 
-        label: "AI Assisted", 
-        value: aiAssistedCount.toString(), 
-        subtext: `${Math.round((aiAssistedCount/totalDoubts)*100)}% coverage`,
+        label: "AI Powered", 
+        value: `${Math.round((aiAssistedCount/totalDoubts)*100)}%`, 
+        subtext: "Of your questions get AI insights",
         highlight: false,
         color: "text-purple-400"
       },
       { 
         icon: CheckCircle, 
-        label: "Resolved", 
-        value: resolvedDoubts.toString(), 
-        subtext: `${Math.round((resolvedDoubts/totalDoubts)*100)}% success`,
+        label: "Success Rate", 
+        value: `${Math.round((resolvedDoubts/totalDoubts)*100)}%`, 
+        subtext: "Questions successfully resolved",
         color: "text-green-400"
       },
       { 
         icon: Timer, 
-        label: "Avg. Time", 
+        label: "Avg. Response", 
         value: avgResolutionTime, 
-        subtext: "Resolution time",
+        subtext: "Typical resolution time for your doubts",
         color: "text-amber-400"
       }
     ];
@@ -1046,7 +1231,7 @@ function EnhancedDoubtsStats({ doubtsData, isLoading, recentActivities, onCatego
             </CardTitle>
             {!isLoading && doubtsData.length > 0 && (
               <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D]">
-                {topCategories.length} active
+                {topCategories.length} trending topics
               </Badge>
             )}
           </div>
