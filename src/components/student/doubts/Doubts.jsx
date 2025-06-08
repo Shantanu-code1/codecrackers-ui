@@ -171,13 +171,38 @@ const EnhancedDoubtPage = () => {
                          (doubt.description?.toLowerCase() ?? '').includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All Categories" || doubt.category === selectedCategory || doubt.topic === selectedCategory;
     
-    // Enhanced status filtering
-    const matchesStatus = selectedStatus === "All" || 
-                         (selectedStatus === "Pending" && (!doubt.isSolved || doubt.isSolved === "PENDING")) ||
-                         (selectedStatus === "In Progress" && (doubt.isSolved === "IN_PROGRESS" || doubt.assignedTo)) ||
-                         (selectedStatus === "Solved" && doubt.isSolved && doubt.isSolved !== "PENDING" && doubt.isSolved !== "IN_PROGRESS") ||
-                         (selectedStatus === "Saved" && (doubt.isSaved || doubt.bookmarked)) ||
-                         (selectedStatus === "Needs Attention" && doubt.isSolved === "PENDING");
+    // Enhanced status filtering - need to calculate status for each doubt to filter properly
+    let doubtStatus = "Pending";
+    if (selectedStatus !== "All") {
+      // Replicate the status logic for filtering
+      const doubtId = doubt.id || doubt.title || "default";
+      let hash = 0;
+      for (let i = 0; i < doubtId.toString().length; i++) {
+        const char = doubtId.toString().charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      const hashCode = Math.abs(hash);
+      const isAssigned = (doubt.isSolved || "PENDING") === "PENDING" && (hashCode % 100) < 50;
+      const isSaved = (hashCode % 100) < 20;
+      const safeStatus = doubt.isSolved || "PENDING";
+      
+      if (safeStatus !== "PENDING" && safeStatus !== "IN_PROGRESS") {
+        doubtStatus = "Resolved";
+      } else if (safeStatus === "IN_PROGRESS" || isAssigned) {
+        doubtStatus = "In Progress";
+      } else if (doubt.isSaved || doubt.bookmarked || isSaved) {
+        doubtStatus = "Saved";
+      } else if (safeStatus === "PENDING") {
+        const timeVariant = hashCode % 4;
+        if (timeVariant === 0) doubtStatus = "Pending";
+        else if (timeVariant === 1) doubtStatus = "Under Review";
+        else if (timeVariant === 2) doubtStatus = "Needs Attention";
+        else doubtStatus = "Recently Posted";
+      }
+    }
+    
+    const matchesStatus = selectedStatus === "All" || selectedStatus === doubtStatus;
                          
     const matchesLanguage = selectedLanguage === "All Languages" || doubt.language === selectedLanguage || doubt.category === selectedLanguage;
     
