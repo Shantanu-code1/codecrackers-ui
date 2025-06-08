@@ -567,7 +567,6 @@ function DoubtCard({ doubt, onAddActivity }) {
       </CardHeader>
       
       <CardContent className="p-4 space-y-4">
-        <p className="text-[#E5E7EB] leading-relaxed">{safeDescription}</p>
         
         {safeCodeSnippet && (
           <div className="bg-[#0D1117] border border-[#30363D] rounded-md p-4 overflow-x-auto">
@@ -586,26 +585,6 @@ function DoubtCard({ doubt, onAddActivity }) {
         </div>
         
         <div className="flex justify-between items-center pt-2 border-t border-[#30363D]/50">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-[#A1A1AA] hover:text-[#E5E7EB]"
-              onClick={handleSave}
-            >
-              <Star className="w-4 h-4 mr-1" />
-              Save
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-[#A1A1AA] hover:text-[#E5E7EB]"
-              onClick={handleReply}
-            >
-              <MessageCircle className="w-4 h-4 mr-1" />
-              Reply
-            </Button>
-          </div>
           <Badge 
             className={`${ 
               safeStatus !== "PENDING"

@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import Header from '../header/Header'
 import logo from "../../../img/niqSolve-removebg.png"
+import logo2 from "../../../img/niqSolve4-removebg.png"
 
 // Mock AI responses and data
 const AI_RESPONSES = {
@@ -322,8 +323,8 @@ const AiTutor = () => {
              </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-4xl mx-auto">
+            <div className="flex-1 overflow-y-auto max-h-[calc(100vh-200px)]">
+              <div className="max-w-4xl mx-auto px-4 py-4">
                 <AnimatePresence>
                   {messages.map((message) => (
                     <motion.div
@@ -331,21 +332,21 @@ const AiTutor = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
-                      className={`${message.type === 'ai' ? 'bg-white/5' : ''}`}
+                      className="mb-6"
                     >
-                      <div className="max-w-4xl mx-auto px-4 py-6">
-                        <div className="flex space-x-4">
+                      <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`flex ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'} space-x-3 max-w-2xl`}>
                           <div className="flex-shrink-0">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              message.type === 'ai' 
-                                ? 'bg-gradient-to-r from-blue-500 to-purple-600' 
-                                : 'bg-gradient-to-r from-gray-600 to-gray-700'
-                            }`}>
-                              {message.type === 'ai' ? <Brain className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center`}>
+                              {message.type === 'ai' ? <img src={logo2} alt="NiqSolve logo" className="w-10 h-10 text-white" /> : ""}
                             </div>
                           </div>
                           <div className="flex-1 space-y-2">
-                            <div className="prose prose-gray dark:prose-invert max-w-none">
+                            <div className={`p-4 rounded-2xl ${
+                              message.type === 'ai' 
+                                ? 'bg-white/10 backdrop-blur-sm border border-white/20' 
+                                : 'bg-blue-600/80 backdrop-blur-sm'
+                            }`}>
                               <div className="text-white whitespace-pre-wrap">
                                 {message.content}
                               </div>
@@ -389,20 +390,22 @@ const AiTutor = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="bg-white/5"
+                    className="mb-6"
                   >
-                    <div className="max-w-4xl mx-auto px-4 py-6">
-                      <div className="flex space-x-4">
+                    <div className="flex justify-start">
+                      <div className="flex flex-row space-x-3 max-w-2xl">
                         <div className="flex-shrink-0">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                             <Brain className="w-5 h-5 text-white" />
                           </div>
                         </div>
                         <div className="flex-1">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" />
-                            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                          <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" />
+                              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -414,38 +417,36 @@ const AiTutor = () => {
             </div>
 
             {/* Chat Input */}
-            <div className="border-t border-white/10 bg-black/20 backdrop-blur-lg">
-              <div className="max-w-4xl mx-auto px-4 py-4">
-                <div className="flex space-x-3">
+            <div className="border-t border-white/10 bg-black/20 backdrop-blur-lg sticky bottom-0">
+              <div className="max-w-3xl mx-auto px-4 py-3">
+                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-gray-300 hover:text-white hover:bg-white/10"
+                    className="text-gray-300 hover:text-white hover:bg-white/10 p-2"
                   >
                     <Upload className="w-4 h-4" />
                   </Button>
                   
-                  <div className="flex-1 flex space-x-3">
-                                        <Input
-                      placeholder="Continue the conversation..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                      className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-gray-300 focus:border-white/20 focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:shadow-none"
-                      style={{
-                        outline: 'none',
-                        boxShadow: 'none'
-                      }}
-                    />
-                    <Button 
-                      onClick={sendMessage}
-                      disabled={!newMessage.trim() || isTyping}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Input
+                    placeholder="Continue the conversation..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                    className="flex-1 bg-transparent border-none text-white placeholder-gray-300 focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:shadow-none"
+                    style={{
+                      outline: 'none',
+                      boxShadow: 'none'
+                    }}
+                  />
+                  <Button 
+                    onClick={sendMessage}
+                    disabled={!newMessage.trim() || isTyping}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-2 rounded-xl"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </div>
