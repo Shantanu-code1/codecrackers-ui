@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Star, Book, Clock, MessageCircle, TrendingUp, Filter, ArrowUpRight, CheckCircle, AlertCircle, Sparkles, MoreHorizontal, ChevronDown, Bookmark, Code, UserCircle } from "lucide-react"
+import { Search, Star, Book, Clock, MessageCircle, TrendingUp, Filter, ArrowUpRight, CheckCircle, AlertCircle, Sparkles, MoreHorizontal, ChevronDown, Bookmark, Code, UserCircle, Bot, Zap, Timer, User, Eye, ChevronRight, Play } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -10,49 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import Header from "../header/Header"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { useSubmitDoubt } from "@/hooks/useSubmitDoubt"
 import { useFetchDoubts } from "@/hooks/useFetchDoubts"
 import { useUserDoubts } from "@/hooks/useUserDoubts"
-import signuporloginStore from '@/zustand/login-signup/store'
-
-const mockTeachers = [
-  {
-    id: 1,
-    name: "Dr. Jane Smith",
-    expertise: ["Algorithms", "Data Structures"],
-    rating: 4.8,
-    doubtsAnswered: 120,
-    image: "/placeholder.svg",
-  },
-  {
-    id: 2,
-    name: "Prof. John Doe",
-    expertise: ["JavaScript", "React", "Node.js"],
-    rating: 4.9,
-    doubtsAnswered: 150,
-    image: "/placeholder.svg",
-  },
-  {
-    id: 3,
-    name: "Dr. Emily Brown",
-    expertise: ["Python", "Machine Learning", "AI"],
-    rating: 4.7,
-    doubtsAnswered: 100,
-    image: "/placeholder.svg",
-  },
-]
-
-const analyticsData = [
-  { name: "Jan", doubts: 40, solutions: 30 },
-  { name: "Feb", doubts: 30, solutions: 25 },
-  { name: "Mar", doubts: 50, solutions: 45 },
-  { name: "Apr", doubts: 40, solutions: 35 },
-  { name: "May", doubts: 60, solutions: 55 },
-  { name: "Jun", doubts: 50, solutions: 48 },
-]
+import logo from "../../../img/niqSolve4-removebg.png"
+import { Pencil } from "lucide-react"
 
 function formatRelativeTime(dateString) {
   const date = dateString instanceof Date ? dateString : new Date(dateString);
@@ -78,11 +43,46 @@ function formatRelativeTime(dateString) {
   }
 }
 
+// Enhanced function to get urgency level and color
+function getUrgencyInfo(dateString, status) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+  
+  if (status !== "PENDING") return { level: "resolved", color: "text-green-400", text: "Resolved" };
+  
+  if (diffHours < 2) return { level: "new", color: "text-blue-400", text: "Just posted" };
+  if (diffHours < 24) return { level: "recent", color: "text-yellow-400", text: `${diffHours}h pending` };
+  if (diffHours < 72) return { level: "urgent", color: "text-orange-400", text: `${Math.floor(diffHours/24)}d pending` };
+  return { level: "critical", color: "text-red-400", text: "Needs attention" };
+}
+
+// Language/Technology icon mapping
+const getTechIcon = (category) => {
+  const icons = {
+    "JavaScript": "🟨",
+    "Python": "🐍", 
+    "Java": "☕",
+    "C++": "⚡",
+    "React": "⚛️",
+    "Node.js": "🟢",
+    "Algorithms": "🧮",
+    "Data Structures": "📊",
+    "Database": "🗄️",
+    "Web Development": "🌐",
+    "AI": "🤖"
+  };
+  return icons[category] || "💻";
+}
+
 const EnhancedDoubtPage = () => {
   const [selectedTab, setSelectedTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All Categories")
   const [selectedStatus, setSelectedStatus] = useState("All")
+  const [selectedLanguage, setSelectedLanguage] = useState("All Languages")
+  const [selectedDifficulty, setSelectedDifficulty] = useState("All Levels")
+  const [sortBy, setSortBy] = useState("newest")
   const [selectedDate, setSelectedDate] = useState("All")
   const [ratingFilter, setRatingFilter] = useState([0, 5])
   const [expertiseFilter, setExpertiseFilter] = useState([])
@@ -165,24 +165,46 @@ const EnhancedDoubtPage = () => {
     setPreviewMode(!previewMode)
   }
 
-  const filteredDoubts = doubtsData.filter(
-    (doubt) =>
-      (doubt.title?.toLowerCase() ?? '').includes(searchQuery.toLowerCase()) &&
-      (selectedCategory === "All Categories" || doubt.category === selectedCategory) &&
-      (selectedStatus === "All" || 
-       (selectedStatus === "Pending" && (!doubt.isSolved || doubt.isSolved === "PENDING")) ||
-       (selectedStatus === "Solved" && doubt.isSolved && doubt.isSolved !== "PENDING")) &&
-      true
-  )
+  // Enhanced filtering with multiple criteria
+  const filteredDoubts = doubtsData.filter((doubt) => {
+    const matchesSearch = (doubt.title?.toLowerCase() ?? '').includes(searchQuery.toLowerCase()) ||
+                         (doubt.description?.toLowerCase() ?? '').includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "All Categories" || doubt.category === selectedCategory || doubt.topic === selectedCategory;
+    const matchesStatus = selectedStatus === "All" || 
+                         (selectedStatus === "Pending" && (!doubt.isSolved || doubt.isSolved === "PENDING")) ||
+                         (selectedStatus === "Solved" && doubt.isSolved && doubt.isSolved !== "PENDING") ||
+                         (selectedStatus === "In Progress" && doubt.assignedTo); // Assuming assignedTo field exists
+    const matchesLanguage = selectedLanguage === "All Languages" || doubt.language === selectedLanguage || doubt.category === selectedLanguage;
+    
+    return matchesSearch && matchesCategory && matchesStatus && matchesLanguage;
+  });
 
-  const filteredTeachers = mockTeachers.filter(
-    (teacher) =>
-      teacher.rating >= ratingFilter[0] &&
-      teacher.rating <= ratingFilter[1] &&
-      (expertiseFilter.length === 0 || teacher.expertise.some((exp) => expertiseFilter.includes(exp))),
-  )
+  // Enhanced sorting
+  const sortedDoubts = [...filteredDoubts].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.timeSubmitted || 0) - new Date(a.timeSubmitted || 0);
+      case "oldest":
+        return new Date(a.timeSubmitted || 0) - new Date(b.timeSubmitted || 0);
+      case "most_engaged":
+        return (b.replies?.length || 0) - (a.replies?.length || 0);
+      case "urgent":
+        const aHours = Math.floor((new Date() - new Date(a.timeSubmitted)) / (1000 * 60 * 60));
+        const bHours = Math.floor((new Date() - new Date(b.timeSubmitted)) / (1000 * 60 * 60));
+        return bHours - aHours; // Oldest pending first for urgency
+      default:
+        return 0;
+    }
+  });
 
   const categoriesList = ["All Categories", "Algorithms", "JavaScript", "React", "Data Structures", "Dynamic Programming", "Complexity Analysis", "Sorting", "Web Development", "System Design", "Database"]
+  const languagesList = ["All Languages", "JavaScript", "Python", "Java", "C++", "React", "Node.js"]
+  const sortOptions = [
+    { value: "newest", label: "Newest First" },
+    { value: "oldest", label: "Oldest First" },
+    { value: "most_engaged", label: "Most Engaged" },
+    { value: "urgent", label: "Most Urgent" }
+  ]
 
   const handleAskQuestion = () => {
     // Validate form
@@ -209,6 +231,12 @@ const EnhancedDoubtPage = () => {
     submitDoubt(doubtData)
   }
 
+  // Handle category filter from sidebar
+  const handleCategoryFilter = (category) => {
+    setSelectedCategory(category);
+    addActivity("filter_applied", "Category Filter", `Filtered by ${category}`);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0D1117] via-[#111827] to-[#0D1117] text-[#E5E7EB] pb-16 relative">
       {/* Background decoration */}
@@ -220,46 +248,116 @@ const EnhancedDoubtPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-[7rem]">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-[#E5E7EB]">Coding Doubts</h1>
-            <p className="text-[#A1A1AA] mt-1">Find answers to your programming questions</p>
+            <h1 className="text-3xl font-semibold text-[#E5E7EB] flex items-center">
+              <span className="mr-3 text-4xl">🚀</span>
+              Coding Doubts
+            </h1>
+            <p className="text-[#A1A1AA] mt-1">Get instant AI insights + expert guidance</p>
           </div>
           
           <Button 
-            className="bg-gradient-to-r from-[#0070F3] to-[#3b82f6] hover:opacity-90 text-white shadow-md shadow-[#0070F3]/20 flex items-center"
+            className="bg-gradient-to-r from-[#0070F3] to-[#3b82f6] hover:opacity-90 hover:scale-105 text-white shadow-md shadow-[#0070F3]/20 flex items-center transition-all duration-200"
             onClick={() => setIsAskModalOpen(true)}
           >
-            <MessageCircle className="w-4 h-4 mr-2" />
+            <Sparkles className="w-4 h-4 mr-2" />
             Ask a Question
           </Button>
         </div>
 
-        {/* Search and filter bar */}
+        {/* Enhanced Search and filter bar */}
         <Card className="bg-gradient-to-r from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] mb-6 shadow-lg overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-4">
+              {/* Search Bar */}
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#A1A1AA]" />
-                  <Input
-                  placeholder="Search doubts..." 
-                  className="pl-10 bg-[#0D1117] border-[#30363D] text-[#E5E7EB] w-full focus:ring-[#0070F3] focus:border-[#0070F3]"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
+                <Input
+                  placeholder="Search doubts, code snippets, or error messages..." 
+                  className="pl-10 bg-[#0D1117] border-[#30363D] text-[#E5E7EB] w-full focus:ring-[#0070F3] focus:border-[#0070F3] h-12"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               
-              <div className="flex gap-2">
+              {/* Enhanced Filters */}
+              <div className="flex flex-wrap gap-3">
+                {/* Status Filter */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] flex items-center">
-                      <Filter className="w-4 h-4 mr-2" />
+                    <Button variant="outline" className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors">
+                      <AlertCircle className="w-4 h-4 mr-2" />
                       {selectedStatus}
                       <ChevronDown className="w-4 h-4 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
-                    <DropdownMenuItem onClick={() => setSelectedStatus("All")}>All Statuses</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSelectedStatus("Solved")}>Solved</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSelectedStatus("Pending")}>Pending</DropdownMenuItem>
+                    <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-[#30363D]" />
+                    <DropdownMenuItem onClick={() => setSelectedStatus("All")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-[#A1A1AA] mr-2"></div>
+                        All Statuses
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Pending")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-amber-400 mr-2"></div>
+                        Pending
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("In Progress")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-blue-400 mr-2"></div>
+                        In Progress
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Solved")}>
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
+                        Solved
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Language Filter */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors">
+                      <Code className="w-4 h-4 mr-2" />
+                      {selectedLanguage}
+                      <ChevronDown className="w-4 h-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
+                    <DropdownMenuLabel>Filter by Language</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-[#30363D]" />
+                    {languagesList.map((language) => (
+                      <DropdownMenuItem key={language} onClick={() => setSelectedLanguage(language)}>
+                        <span className="mr-2">{getTechIcon(language)}</span>
+                        {language}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Sort Options */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      {sortOptions.find(s => s.value === sortBy)?.label}
+                      <ChevronDown className="w-4 h-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
+                    <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-[#30363D]" />
+                    {sortOptions.map((option) => (
+                      <DropdownMenuItem key={option.value} onClick={() => setSortBy(option.value)}>
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -268,77 +366,93 @@ const EnhancedDoubtPage = () => {
         </Card>
 
         {/* Main content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left panel - Doubts list with scrolling */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Left panel - Enhanced Doubts list */}
           <div className="md:col-span-2">
-            <div className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border border-[#30363D] rounded-lg shadow-lg p-4">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border border-[#30363D] rounded-lg shadow-lg p-6">
+              <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-[#E5E7EB] flex items-center">
-                  <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
+                  <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
                   Coding Doubts
                 </h2>
-                <Badge className="bg-[#0070F3]/10 text-[#0070F3] border border-[#0070F3]/30">
-                  {filteredDoubts.length} results
-                </Badge>
+                <div className="flex items-center gap-3">
+                  <Badge className="bg-[#0070F3]/10 text-[#0070F3] border border-[#0070F3]/30 px-3 py-1">
+                    Showing {sortedDoubts.length} of {doubtsData.length} results
+                  </Badge>
+                </div>
               </div>
               
-              {/* Add this scrollable container */}
-              <div className="max-h-[600px] overflow-y-auto pr-2 custom-scrollbar space-y-4">
+              {/* Enhanced scrollable container with better spacing */}
+              <div className="max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                 {isLoading ? (
-                  // Skeleton loaders for doubts
-                  Array(3).fill(0).map((_, i) => (
-                    <div key={i} className="animate-pulse mb-4">
-                      <div className="bg-[#0D1117] rounded-lg p-4 border border-[#30363D]">
-                        <div className="h-4 bg-[#30363D] rounded w-3/4 mb-3"></div>
-                        <div className="h-3 bg-[#30363D] rounded w-1/2 mb-3"></div>
-                        <div className="flex space-x-2 mb-2">
-                          <div className="h-2 bg-[#30363D] rounded w-16"></div>
-                          <div className="h-2 bg-[#30363D] rounded w-20"></div>
-                        </div>
-                        <div className="flex justify-between">
-                          <div className="h-3 bg-[#30363D] rounded w-24"></div>
-                          <div className="h-3 bg-[#30363D] rounded w-16"></div>
+                  // Enhanced skeleton loaders
+                  <div className="space-y-6">
+                    {Array(3).fill(0).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="bg-[#0D1117] rounded-xl p-6 border border-[#30363D]">
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center">
+                              <div className="h-4 bg-[#30363D] rounded w-6 mr-3"></div>
+                              <div className="h-5 bg-[#30363D] rounded w-48"></div>
+                            </div>
+                            <div className="h-4 bg-[#30363D] rounded w-20"></div>
+                          </div>
+                          <div className="h-3 bg-[#30363D] rounded w-32 mb-4"></div>
+                          <div className="h-16 bg-[#30363D] rounded mb-4"></div>
+                          <div className="flex justify-between items-center">
+                            <div className="flex space-x-2">
+                              <div className="h-6 bg-[#30363D] rounded w-16"></div>
+                              <div className="h-6 bg-[#30363D] rounded w-20"></div>
+                            </div>
+                            <div className="h-6 bg-[#30363D] rounded w-24"></div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-                ) : isError ? (
-                  // Error state
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto rounded-full bg-[#0D1117] flex items-center justify-center mb-4 border border-[#FF4D4F]">
-                      <AlertCircle className="w-8 h-8 text-[#FF4D4F]" />
-                    </div>
-                    <h3 className="text-lg font-medium text-[#E5E7EB] mb-1">Error fetching doubts</h3>
-                    <p className="text-[#A1A1AA] mb-4">{error?.message || "An unexpected error occurred."}</p>
+                    ))}
                   </div>
-                ) : filteredDoubts.length > 0 ? (
-                <AnimatePresence>
-                  {filteredDoubts.map((doubt) => (
-                    <motion.div
-                      key={doubt.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.2 }}
-                      layout
-                      >
-                        <DoubtCard doubt={doubt} onAddActivity={addActivity} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                ) : isError ? (
+                  // Enhanced error state
+                  <div className="text-center py-16">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#FF4D4F]/20 to-[#FF4D4F]/5 flex items-center justify-center mb-6 border border-[#FF4D4F]/30">
+                      <AlertCircle className="w-10 h-10 text-[#FF4D4F]" />
+                    </div>
+                    <h3 className="text-xl font-medium text-[#E5E7EB] mb-2">Error fetching doubts</h3>
+                    <p className="text-[#A1A1AA] mb-6 max-w-md mx-auto">{error?.message || "An unexpected error occurred while loading your doubts."}</p>
+                    <Button onClick={() => refetch()} className="bg-[#0070F3] hover:bg-[#0070F3]/90">
+                      Try Again
+                    </Button>
+                  </div>
+                ) : sortedDoubts.length > 0 ? (
+                  <div className="space-y-6">
+                    <AnimatePresence>
+                      {sortedDoubts.map((doubt) => (
+                        <motion.div
+                          key={doubt.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                          layout
+                        >
+                          <EnhancedDoubtCard doubt={doubt} onAddActivity={addActivity} />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
                 ) : (
-                  // Empty state
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto rounded-full bg-[#0D1117] flex items-center justify-center mb-4 border border-[#30363D]">
-                      <AlertCircle className="w-8 h-8 text-[#A1A1AA]" />
-              </div>
-                    <h3 className="text-lg font-medium text-[#E5E7EB] mb-1">No doubts found</h3>
-                    <p className="text-[#A1A1AA] mb-4">Try adjusting your filters or search terms, or ask a new question.</p>
+                  // Enhanced empty state
+                  <div className="text-center py-16">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#0070F3]/20 to-[#0070F3]/5 flex items-center justify-center mb-6 border border-[#0070F3]/30">
+                      <MessageCircle className="w-10 h-10 text-[#0070F3]" />
+                    </div>
+                    <h3 className="text-xl font-medium text-[#E5E7EB] mb-2">No doubts found</h3>
+                    <p className="text-[#A1A1AA] mb-6 max-w-md mx-auto">Try adjusting your filters or search terms, or ask your first question to get started.</p>
                     <Button 
-                      className="bg-[#0070F3] hover:bg-[#0070F3]/90 text-white"
+                      className="bg-gradient-to-r from-[#0070F3] to-[#3b82f6] hover:opacity-90 text-white"
                       onClick={() => setIsAskModalOpen(true)}
                     >
-                      Ask a Question
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Ask Your First Question
                     </Button>
                   </div>
                 )}
@@ -346,9 +460,14 @@ const EnhancedDoubtPage = () => {
             </div>
           </div>
           
-          {/* Right panel - Stats */}
+          {/* Right panel - Enhanced Stats */}
           <div className="md:col-span-1">
-            <DoubtsStats doubtsData={doubtsData} isLoading={isLoading} recentActivities={recentActivities} />
+            <EnhancedDoubtsStats 
+              doubtsData={doubtsData} 
+              isLoading={isLoading} 
+              recentActivities={recentActivities}
+              onCategoryFilter={handleCategoryFilter}
+            />
           </div>
         </div>
       </div>
@@ -357,16 +476,16 @@ const EnhancedDoubtPage = () => {
         <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB]">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold flex items-center">
-              <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
+              <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
               Ask a Question
             </DialogTitle>
             <DialogDescription className="text-[#A1A1AA]">
-              Provide details about your coding question to get the best answers.
+              Provide details about your coding question to get instant AI insights + expert answers.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-                  <div className="space-y-2">
+            <div className="space-y-2">
               <Label htmlFor="title" className="text-[#E5E7EB]">Question Title</Label>
               <Input 
                 id="title"
@@ -395,7 +514,10 @@ const EnhancedDoubtPage = () => {
                 <SelectContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
                   {categoriesList.filter(cat => cat !== "All Categories").map((category) => (
                     <SelectItem key={category} value={category}>
-                      {category}
+                      <div className="flex items-center">
+                        <span className="mr-2">{getTechIcon(category)}</span>
+                        {category}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -429,7 +551,7 @@ const EnhancedDoubtPage = () => {
               <Label htmlFor="code" className="text-[#E5E7EB] flex items-center">
                 <Code className="w-4 h-4 mr-1" />
                 Code Snippet (Optional)
-                        </Label>
+              </Label>
               <Textarea 
                 id="code"
                 className="min-h-32 bg-[#0D1117] border-[#30363D] text-[#E5E7EB] focus:border-[#0070F3] focus:ring-[#0070F3]/10 font-mono text-sm resize-none"
@@ -437,7 +559,7 @@ const EnhancedDoubtPage = () => {
                 value={newQuestion.code}
                 onChange={(e) => setNewQuestion({...newQuestion, code: e.target.value})}
               />
-                      </div>
+            </div>
             
             <div className="space-y-2">
               <Label className="text-[#E5E7EB]">Tags (Select up to 3)</Label>
@@ -446,10 +568,10 @@ const EnhancedDoubtPage = () => {
                   <Badge 
                     key={tag}
                     variant="outline"
-                    className={`cursor-pointer ${
+                    className={`cursor-pointer transition-all duration-200 ${
                       newQuestion.tags.includes(tag) 
-                        ? "bg-[#0070F3]/20 text-[#0070F3] border-[#0070F3]/30" 
-                        : "bg-[#0D1117] text-[#A1A1AA] border-[#30363D] hover:bg-[#30363D]/30"
+                        ? "bg-[#0070F3]/20 text-[#0070F3] border-[#0070F3]/30 scale-105" 
+                        : "bg-[#0D1117] text-[#A1A1AA] border-[#30363D] hover:bg-[#30363D]/30 hover:scale-105"
                     }`}
                     onClick={() => {
                       if (newQuestion.tags.includes(tag)) {
@@ -467,14 +589,15 @@ const EnhancedDoubtPage = () => {
                   >
                     {tag}
                   </Badge>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
+            </div>
+          </div>
           
           <DialogFooter className="flex justify-between items-center pt-4 border-t border-[#30363D]/50">
-            <div className="text-xs text-[#A1A1AA]">
-              Please review our community guidelines before posting.
+            <div className="text-xs text-[#A1A1AA] flex items-center">
+              <Bot className="w-3 h-3 mr-1" />
+              AI will analyze your question instantly upon submission
             </div>
             <div className="flex space-x-2">
               <Button 
@@ -495,152 +618,314 @@ const EnhancedDoubtPage = () => {
                     <span className="animate-spin mr-2">⏳</span>
                     Submitting...
                   </>
-                ) : 'Submit Question'}
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Submit Question
+                  </>
+                )}
               </Button>
             </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Also add this CSS for a better scrollbar */}
+      {/* Enhanced scrollbar styles and utilities */}
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #0D1117;
-          border-radius: 4px;
+          background: linear-gradient(to bottom, #0D1117, #161B22);
+          border-radius: 8px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #30363D;
-          border-radius: 4px;
+          background: linear-gradient(to bottom, #30363D, #21262D);
+          border-radius: 8px;
+          border: 1px solid #161B22;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #0070F3;
+          background: linear-gradient(to bottom, #0070F3, #3b82f6);
+        }
+
+        /* Line clamp utilities for text truncation */
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .line-clamp-3 {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        /* Enhanced hover effects */
+        .group:hover .group-hover\\:scale-105 {
+          transform: scale(1.05);
+        }
+
+        .group:hover .group-hover\\:text-primary {
+          color: #0070F3;
+        }
+
+        /* Smooth transitions for all interactive elements */
+        * {
+          transition-property: color, background-color, border-color, transform, box-shadow, opacity;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 200ms;
         }
       `}</style>
     </div>
   )
 }
 
-function DoubtCard({ doubt, onAddActivity }) {
+function EnhancedDoubtCard({ doubt, onAddActivity }) {
   // Adjust to match the actual API response structure
   const safeTags = Array.isArray(doubt.tagsList) ? doubt.tagsList : [];
-  const safeDate = doubt.timeSubmitted ? new Date(doubt.timeSubmitted).toLocaleDateString() : "Date unknown";
+  const safeDate = doubt.timeSubmitted ? new Date(doubt.timeSubmitted) : new Date();
   const safeDescription = doubt.description || "No description provided.";
   const safeCodeSnippet = doubt.codeSnippet || null;
   const safeTitle = doubt.title || "Untitled Doubt";
-  const safeTopic = doubt.topic || "Uncategorized";
+  const safeTopic = doubt.topic || doubt.category || "Uncategorized";
   const safeStatus = doubt.isSolved || "PENDING";
+  
+  // Get urgency info
+  const urgencyInfo = getUrgencyInfo(safeDate, safeStatus);
+  
+  // Get tech icon
+  const techIcon = getTechIcon(safeTopic);
+  
+  // Mock AI suggestions (in real app, this would come from API)
+  const hasAISuggestions = Math.random() > 0.6; // 40% chance of AI suggestions
+  const aiSuggestionCount = Math.floor(Math.random() * 3) + 1;
 
-  const handleSave = (e) => {
+  const handleEdit = (e) => {
     e.preventDefault();
     e.stopPropagation();
     onAddActivity("doubt_saved", safeTitle, `You saved a doubt for later: ${safeTitle}`);
   };
 
-  const handleReply = (e) => {
+  const handleAskAI = (e) => {
     e.preventDefault();
     e.stopPropagation();
     onAddActivity("question_reply", safeTitle, `You started a reply to: ${safeTitle}`);
   };
 
+  const handleViewDetails = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddActivity("doubt_viewed", safeTitle, `You viewed details for: ${safeTitle}`);
+  };
+
   return (
-    <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-      <CardHeader className="pb-3 border-b border-[#30363D]/50">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-semibold text-[#E5E7EB]">{safeTitle}</CardTitle>
-            <Badge className="mt-2 bg-[#0D1117] text-[#A1A1AA] border-[#30363D]">
-              {safeTopic}
-            </Badge>
+    <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,112,243,0.15)] hover:border-[#0070F3]/30 hover:scale-[1.02] group cursor-pointer" onClick={handleViewDetails}>
+      <CardHeader className="pb-4 border-b border-[#30363D]/50">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-start flex-1">
+            <span className="text-2xl mr-3 flex-shrink-0">{techIcon}</span>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg font-semibold text-[#E5E7EB] group-hover:text-[#0070F3] transition-colors line-clamp-2 pr-2">
+                {safeTitle}
+              </CardTitle>
+              <div className="flex items-center gap-3 mt-2">
+                <Badge className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs">
+                  {safeTopic}
+                </Badge>
+                <span className={`text-xs font-medium ${urgencyInfo.color} flex items-center`}>
+                  <Timer className="w-3 h-3 mr-1" />
+                  {urgencyInfo.text}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 hover:bg-[#0070F3]/10"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-[#0D1117] border-[#30363D]">
+                <DropdownMenuItem onClick={handleEdit}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleAskAI}>
+                    <img src={logo} alt="AI" width={20} height={20} className="ml-[-0.3rem]" />
+                    Ask AI
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-        <CardDescription className="flex items-center mt-2 text-[#A1A1AA]">
-          <span className="text-xs flex items-center">
-            <Clock className="w-3 h-3 mr-1" /> {safeDate}
-          </span>
+
+        {/* Description preview */}
+        <CardDescription className="text-[#A1A1AA] text-sm line-clamp-2 leading-relaxed">
+          {safeDescription}
         </CardDescription>
       </CardHeader>
       
       <CardContent className="p-4 space-y-4">
-        
+        {/* Code snippet preview */}
         {safeCodeSnippet && (
-          <div className="bg-[#0D1117] border border-[#30363D] rounded-md p-4 overflow-x-auto">
-            <pre className="text-[#E5E7EB] font-mono text-sm whitespace-pre">
+          <div className="bg-[#0D1117] border border-[#30363D] rounded-lg p-3 overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center text-xs text-[#A1A1AA]">
+                <Code className="w-3 h-3 mr-1" />
+                Code Preview
+              </div>
+              <Button size="sm" variant="ghost" className="h-6 px-2 text-xs hover:bg-[#30363D]/30">
+                <Play className="w-3 h-3 mr-1" />
+                Expand
+              </Button>
+            </div>
+            <pre className="text-[#E5E7EB] font-mono text-xs whitespace-pre line-clamp-3 overflow-hidden">
               {safeCodeSnippet}
             </pre>
           </div>
         )}
         
+        {/* AI Suggestions Preview */}
+        {hasAISuggestions && (
+          <div className="bg-gradient-to-r from-[#0070F3]/5 to-[#8884d8]/5 border border-[#0070F3]/20 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-sm text-[#0070F3]">
+                <Bot className="w-4 h-4 mr-2" />
+                <span className="font-medium">AI Insights Available</span>
+              </div>
+              <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
+                {aiSuggestionCount} suggestions
+              </Badge>
+            </div>
+            <p className="text-xs text-[#A1A1AA] mt-1">
+              AI has analyzed your code and found potential solutions
+            </p>
+          </div>
+        )}
+        
+        {/* Tags */}
         <div className="flex flex-wrap gap-2">
-          {safeTags.map((tag, index) => (
-            <Badge key={`${tag}-${index}`} variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D]">
-              {tag}
+          {safeTags.slice(0, 3).map((tag, index) => (
+            <Badge 
+              key={`${tag}-${index}`} 
+              variant="outline" 
+              className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] hover:border-[#0070F3]/30 hover:text-[#0070F3] transition-colors cursor-pointer text-xs"
+            >
+              #{tag}
             </Badge>
           ))}
+          {safeTags.length > 3 && (
+            <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs">
+              +{safeTags.length - 3} more
+            </Badge>
+          )}
         </div>
         
-        <div className="flex justify-between items-center pt-2 border-t border-[#30363D]/50">
-          <Badge 
-            className={`${ 
-              safeStatus !== "PENDING"
-                ? "bg-green-900/20 text-green-400 border-green-800/30" 
-                : "bg-amber-900/20 text-amber-400 border-amber-800/30"
-            }`}
-          >
-            {safeStatus}
-          </Badge>
+        {/* Footer with status and engagement */}
+        <div className="flex justify-between items-center pt-3 border-t border-[#30363D]/50">
+          <div className="flex items-center gap-3">
+            <Badge 
+              className={`text-xs ${
+                safeStatus !== "PENDING"
+                  ? "bg-green-900/20 text-green-400 border-green-800/30" 
+                  : urgencyInfo.level === "critical"
+                  ? "bg-red-900/20 text-red-400 border-red-800/30"
+                  : urgencyInfo.level === "urgent" 
+                  ? "bg-orange-900/20 text-orange-400 border-orange-800/30"
+                  : "bg-amber-900/20 text-amber-400 border-amber-800/30"
+              }`}
+            >
+              <CheckCircle className="w-3 h-3 mr-1" />
+              {safeStatus === "PENDING" ? "Pending" : "Resolved"}
+            </Badge>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
+function EnhancedDoubtsStats({ doubtsData, isLoading, recentActivities, onCategoryFilter }) {
   // Fetch user's doubts with the hook
   const { userDoubtsData, isLoading: isUserDoubtsLoading } = useUserDoubts();
   
-  // Calculate dynamic stats only when not loading and data is available
+  // Calculate enhanced stats with AI insights
   const stats = React.useMemo(() => {
     if (isLoading || !doubtsData || doubtsData.length === 0) {
       return [
-        { icon: UserCircle, label: "Your Doubts", value: "-" },
-        { icon: CheckCircle, label: "Answered", value: "-" },
-        { icon: AlertCircle, label: "Pending", value: "-" }
+        { icon: UserCircle, label: "Your Doubts", value: "-", subtext: "Loading..." },
+        { icon: Bot, label: "AI Assisted", value: "-", subtext: "AI solutions" },
+        { icon: CheckCircle, label: "Resolved", value: "-", subtext: "Success rate" },
+        { icon: Timer, label: "Avg. Time", value: "-", subtext: "Resolution" }
       ];
     }
 
     const totalDoubts = doubtsData.length;
-    const answeredDoubts = doubtsData.filter(d => d.isSolved && d.isSolved !== "PENDING").length;
-    const pendingDoubts = totalDoubts - answeredDoubts;
+    const resolvedDoubts = doubtsData.filter(d => d.isSolved && d.isSolved !== "PENDING").length;
+    const pendingDoubts = totalDoubts - resolvedDoubts;
+    const aiAssistedCount = Math.floor(totalDoubts * 0.7); // Mock: 70% AI assisted
+    const avgResolutionTime = "2.4h"; // Mock average time
     
-    // Get user doubts count - use loading state and fall back to "..." if still loading
+    // Get user doubts count
     const yourDoubts = isUserDoubtsLoading 
       ? "..." 
       : Array.isArray(userDoubtsData) 
         ? userDoubtsData.length 
-        : 0;
+        : totalDoubts;
 
     return [
-      { icon: UserCircle, label: "Your Doubts", value: yourDoubts.toString(), highlight: true },
-      { icon: CheckCircle, label: "Answered", value: answeredDoubts.toString() },
-      { icon: AlertCircle, label: "Pending", value: pendingDoubts.toString() },
+      { 
+        icon: UserCircle, 
+        label: "Your Doubts", 
+        value: yourDoubts.toString(), 
+        subtext: `${pendingDoubts} pending`,
+        highlight: true 
+      },
+      { 
+        icon: Bot, 
+        label: "AI Assisted", 
+        value: aiAssistedCount.toString(), 
+        subtext: `${Math.round((aiAssistedCount/totalDoubts)*100)}% coverage`,
+        highlight: false,
+        color: "text-purple-400"
+      },
+      { 
+        icon: CheckCircle, 
+        label: "Resolved", 
+        value: resolvedDoubts.toString(), 
+        subtext: `${Math.round((resolvedDoubts/totalDoubts)*100)}% success`,
+        color: "text-green-400"
+      },
+      { 
+        icon: Timer, 
+        label: "Avg. Time", 
+        value: avgResolutionTime, 
+        subtext: "Resolution time",
+        color: "text-amber-400"
+      }
     ];
   }, [doubtsData, isLoading, userDoubtsData, isUserDoubtsLoading]);
 
-  // Calculate top categories dynamically with better field detection
+  // Enhanced top categories with click handlers
   const topCategories = React.useMemo(() => {
     if (isLoading || !doubtsData || doubtsData.length === 0) {
       return [];
     }
 
-    // Create a counter for all fields that might contain category information
     const categoryCounts = doubtsData.reduce((acc, doubt) => {
-      // Try different fields that might contain category info, with priority order
       const category = doubt.category || doubt.topic || "Uncategorized";
       acc[category] = (acc[category] || 0) + 1;
       return acc;
@@ -649,108 +934,136 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
     const sortedCategories = Object.entries(categoryCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5); // Take top 5
+      .slice(0, 5);
       
-    // Generate a deterministic color for each category name
     const getColorForCategory = (name, index) => {
       const colors = ["#0070F3", "#8884d8", "#FF4D4F", "#52C41A", "#FAAD14", "#722ED1", "#13C2C2", "#EB2F96"];
-      
-      // Hash the category name to get a consistent index
       let hashCode = 0;
       for (let i = 0; i < name.length; i++) {
         hashCode = (hashCode << 5) - hashCode + name.charCodeAt(i);
-        hashCode |= 0; // Convert to 32bit integer
+        hashCode |= 0;
       }
-      
-      // Use abs to ensure positive number, then mod by array length
       const colorIndex = Math.abs(hashCode) % colors.length;
-      
-      // Or use index position as fallback
       return colors[colorIndex] || colors[index % colors.length];
     };
     
     return sortedCategories.map((cat, index) => ({ 
         ...cat, 
         color: getColorForCategory(cat.name, index),
-        percentage: Math.round((cat.count / doubtsData.length) * 100)
+        percentage: Math.round((cat.count / doubtsData.length) * 100),
+        icon: getTechIcon(cat.name)
     }));
       
   }, [doubtsData, isLoading]);
 
+  // Recent Activities with better formatting
+  const recentActivitiesDisplay = React.useMemo(() => {
+    return recentActivities.slice(0, 5).map(activity => ({
+      ...activity,
+      timeAgo: formatRelativeTime(activity.timestamp),
+      icon: activity.type === "question_asked" ? MessageCircle :
+            activity.type === "doubt_saved" ? Bookmark :
+            activity.type === "doubt_viewed" ? Eye :
+            activity.type === "filter_applied" ? Filter : 
+            CheckCircle
+    }));
+  }, [recentActivities]);
+
   return (
     <div className="space-y-6">
-      {/* Summary Card */}
+      {/* Enhanced Summary Card */}
       <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
-        <CardHeader className="pb-3 border-b border-[#30363D]/50">
+        <CardHeader className="pb-4 border-b border-[#30363D]/50">
           <CardTitle className="text-xl font-semibold flex items-center">
-            <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
+            <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
             Summary
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-5">
           {isLoading ? (
             <div className="grid grid-cols-2 gap-4 animate-pulse">
               {Array(4).fill(0).map((_, i) => (
-                <div key={i} className="bg-[#0D1117] rounded-lg p-4 border border-[#30363D]">
-                  <div className="flex items-center mb-2">
-                    <div className="w-8 h-8 rounded-full bg-[#30363D] mr-2"></div>
-                    <div className="h-3 bg-[#30363D] rounded w-20"></div>
+                <div key={i} className="bg-[#0D1117] rounded-xl p-4 border border-[#30363D]">
+                  <div className="flex items-center mb-3">
+                    <div className="w-10 h-10 rounded-full bg-[#30363D] mr-3"></div>
+                    <div>
+                      <div className="h-3 bg-[#30363D] rounded w-20 mb-1"></div>
+                      <div className="h-2 bg-[#30363D] rounded w-16"></div>
+                    </div>
                   </div>
-                  <div className="h-6 bg-[#30363D] rounded w-10"></div>
+                  <div className="h-7 bg-[#30363D] rounded w-12"></div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {stats.map((stat, index) => (
-                <div 
-                  key={index} 
-                  className={`bg-[#0D1117] rounded-lg p-4 border ${stat.highlight ? 'border-[#0070F3]/30' : 'border-[#30363D]'} ${stat.highlight ? 'bg-[#0070F3]/5' : ''}`}
+                <motion.div 
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className={`bg-gradient-to-br from-[#0D1117] to-[#0D1117]/80 rounded-xl p-4 border transition-all duration-200 hover:scale-105 cursor-pointer ${
+                    stat.highlight 
+                      ? 'border-[#0070F3]/30 bg-gradient-to-br from-[#0070F3]/5 to-[#0070F3]/10 hover:border-[#0070F3]/50' 
+                      : 'border-[#30363D] hover:border-[#30363D]/80'
+                  }`}
                 >
-                  <div className="flex items-center mb-2">
-                    <div className={`w-8 h-8 rounded-full ${stat.highlight ? 'bg-[#0070F3]/20' : 'bg-[#0070F3]/10'} flex items-center justify-center mr-2`}>
-                      <stat.icon className={`w-4 h-4 ${stat.highlight ? 'text-[#0070F3]' : 'text-[#0070F3]'}`} />
+                  <div className="flex items-center mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 ${
+                      stat.highlight 
+                        ? 'bg-gradient-to-br from-[#0070F3]/20 to-[#0070F3]/10' 
+                        : 'bg-[#30363D]/20'
+                    }`}>
+                      <stat.icon className={`w-5 h-5 ${
+                        stat.color || (stat.highlight ? 'text-[#0070F3]' : 'text-[#A1A1AA]')
+                      }`} />
                     </div>
-                    <span className="text-sm text-[#A1A1AA]">{stat.label}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[#A1A1AA] truncate">{stat.label}</p>
+                      <p className="text-xs text-[#A1A1AA]/70">{stat.subtext}</p>
+                    </div>
                   </div>
-                  <p className={`text-2xl font-semibold ${stat.highlight ? 'text-[#0070F3]' : 'text-[#E5E7EB]'}`}>{stat.value}</p>
-                </div>
+                  <p className={`text-2xl font-bold ${
+                    stat.color || (stat.highlight ? 'text-[#0070F3]' : 'text-[#E5E7EB]')
+                  }`}>
+                    {stat.value}
+                  </p>
+                </motion.div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Top Categories Card - Enhanced with animations and better visualization */}
+      {/* Enhanced Top Categories Card with clickable items */}
       <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
-        <CardHeader className="pb-3 border-b border-[#30363D]/50">
+        <CardHeader className="pb-4 border-b border-[#30363D]/50">
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl font-semibold flex items-center">
-              <span className="mr-2 bg-[#0070F3] h-5 w-1 rounded-full"></span>
+              <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
               Top Categories
             </CardTitle>
-            <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D]">
-              {topCategories.length} of {Object.keys(doubtsData.reduce((acc, d) => {
-                const category = d.category || d.topic || "Uncategorized";
-                acc[category] = true;
-                return acc;
-              }, {})).length}
-            </Badge>
+            {!isLoading && doubtsData.length > 0 && (
+              <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D]">
+                {topCategories.length} active
+              </Badge>
+            )}
           </div>
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-5">
           {isLoading ? (
             <div className="space-y-4 animate-pulse">
               {Array(5).fill(0).map((_, i) => (
                 <div key={i} className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="w-2 h-2 rounded-full bg-[#30363D] mr-2"></div>
-                    <div className="h-3 bg-[#30363D] rounded w-24"></div>
+                    <div className="w-8 h-8 rounded-lg bg-[#30363D] mr-3"></div>
+                    <div>
+                      <div className="h-3 bg-[#30363D] rounded w-24 mb-1"></div>
+                      <div className="h-2 bg-[#30363D] rounded w-16"></div>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <div className="h-3 bg-[#30363D] rounded w-8 mr-2"></div>
-                    <div className="w-16 h-1.5 bg-[#30363D] rounded-full"></div>
-                  </div>
+                  <div className="w-16 h-2 bg-[#30363D] rounded-full"></div>
                 </div>
               ))}
             </div>
@@ -760,44 +1073,62 @@ function DoubtsStats({ doubtsData, isLoading, recentActivities }) {
                 {topCategories.map((category, index) => (
                   <motion.div 
                     key={category.name}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                    className="flex flex-col"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="group cursor-pointer"
+                    onClick={() => onCategoryFilter(category.name)}
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: category.color }} />
-                        <span className="text-[#E5E7EB] font-medium">{category.name}</span>
+                    <div className="flex items-center justify-between mb-2 p-3 rounded-lg hover:bg-[#0D1117]/50 transition-all duration-200 group-hover:scale-[1.02]">
+                      <div className="flex items-center flex-1">
+                        <div 
+                          className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 text-lg font-bold"
+                          style={{ backgroundColor: `${category.color}20`, color: category.color }}
+                        >
+                          {category.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[#E5E7EB] font-medium group-hover:text-[#0070F3] transition-colors truncate">
+                              {category.name}
+                            </span>
+                            <div className="flex items-center ml-4">
+                              <span className="text-[#A1A1AA] text-sm mr-2">{category.count}</span>
+                              <Badge className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs">
+                                {category.percentage}%
+                              </Badge>
+                            </div>
+                          </div>
+                          <motion.div 
+                            className="w-full h-2 bg-[#0D1117] rounded-full overflow-hidden mt-2"
+                            initial={{ width: "0%" }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                          >
+                            <motion.div 
+                              className="h-full rounded-full" 
+                              style={{ backgroundColor: category.color }}
+                              initial={{ width: "0%" }}
+                              animate={{ width: `${(category.count / (topCategories[0].count || 1)) * 100}%` }}
+                              transition={{ duration: 0.7, delay: 0.2 + index * 0.1 }}
+                            />
+                          </motion.div>
+                        </div>
                       </div>
-                      <div className="flex items-center">
-                        <span className="text-[#A1A1AA] text-sm mr-2">{category.count}</span>
-                      </div>
+                      <ChevronRight className="w-4 h-4 text-[#A1A1AA] group-hover:text-[#0070F3] opacity-0 group-hover:opacity-100 transition-all" />
                     </div>
-                    <motion.div 
-                      className="w-full h-1.5 bg-[#0D1117] rounded-full overflow-hidden"
-                      initial={{ width: "0%" }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <motion.div 
-                        className="h-full rounded-full" 
-                        style={{ backgroundColor: category.color }}
-                        initial={{ width: "0%" }}
-                        animate={{ width: `${(category.count / (topCategories[0].count || 1)) * 100}%` }}
-                        transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                      />
-                    </motion.div>
                   </motion.div>
                 ))}
               </AnimatePresence>
             </div>
           ) : (
-            <div className="text-center text-[#A1A1AA] py-4 flex flex-col items-center">
-              <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
-              <p>No category data available</p>
-              <p className="text-xs mt-1">Submit questions to see categories</p>
+            <div className="text-center text-[#A1A1AA] py-8 flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-[#0D1117] flex items-center justify-center mb-4 border border-[#30363D]">
+                <TrendingUp className="w-8 h-8 opacity-50" />
+              </div>
+              <p className="font-medium">No category data available</p>
+              <p className="text-xs mt-1 opacity-70">Submit questions to see trending topics</p>
             </div>
           )}
         </CardContent>
