@@ -406,14 +406,14 @@ const QueriesPage = () => {
         <div className="absolute bottom-0 left-0 w-1/4 h-1/3 bg-gradient-to-t from-secondary/5 to-transparent rounded-full blur-[150px] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8 flex justify-between items-center">
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-text mb-2">Community Queries</h1>
-              <p className="text-text-muted">Explore and answer questions from the community</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">Community Queries</h1>
+              <p className="text-sm sm:text-base text-text-muted">Explore and answer questions from the community</p>
             </div>
             {!activeQuery && !showNewQueryForm && (
               <Button 
-                className="bg-secondary hover:bg-secondary/90 text-white"
+                className="bg-secondary hover:bg-secondary/90 text-white w-full sm:w-auto"
                 onClick={() => setShowNewQueryForm(true)}
               >
                 Ask a Question
@@ -783,9 +783,9 @@ const QueriesPage = () => {
               </Card>
 
               {activeQuery && (
-                <div className="fixed bottom-8 right-8">
+                <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50">
                   <Button 
-                    className="bg-secondary hover:bg-secondary/90 text-white shadow-lg rounded-full w-14 h-14 flex items-center justify-center"
+                    className="bg-secondary hover:bg-secondary/90 text-white shadow-lg rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center touch-none"
                     onClick={() => {
                       document.getElementById('answer-form').scrollIntoView({ 
                         behavior: 'smooth', 
@@ -793,27 +793,27 @@ const QueriesPage = () => {
                       });
                     }}
                   >
-                    <MessageCircle className="h-6 w-6" />
+                    <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </div>
               )}
             </div>
           ) : (
             <>
-              <div className="bg-card border border-border rounded-lg p-4 mb-6 shadow-lg">
-                <div className="flex flex-col md:flex-row gap-4">
+              <div className="bg-card border border-border rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 shadow-lg">
+                <div className="flex flex-col gap-3 sm:gap-4">
                   <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted h-4 w-4" />
                     <Input 
                       placeholder="Search queries..." 
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-muted border-border text-text"
+                      className="pl-10 bg-muted border-border text-text text-sm sm:text-base"
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-[180px] bg-muted border-border text-text">
+                      <SelectTrigger className="w-full sm:w-[180px] bg-muted border-border text-text text-sm">
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border text-text">
@@ -824,35 +824,36 @@ const QueriesPage = () => {
                       </SelectContent>
                     </Select>
                     <Button 
-                      className="bg-muted hover:bg-muted/80 text-text border border-border"
+                      className="bg-muted hover:bg-muted/80 text-text border border-border text-sm w-full sm:w-auto"
                       onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                     >
                       <Filter className="h-4 w-4 mr-2" /> 
-                      {showAdvancedFilters ? "Hide Filters" : "Show Filters"}
+                      <span className="hidden sm:inline">{showAdvancedFilters ? "Hide Filters" : "Show Filters"}</span>
+                      <span className="sm:hidden">Filters</span>
                     </Button>
                   </div>
                 </div>
                 
                 {/* Tag filters */}
-                <div className="mt-4">
-                  <div className="flex items-center mb-2">
-                    <span className="text-sm font-medium text-text-muted mr-3">Popular Tags:</span>
+                <div className="mt-3 sm:mt-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center mb-2 gap-2">
+                    <span className="text-xs sm:text-sm font-medium text-text-muted">Popular Tags:</span>
                     {selectedTags.length > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedTags([])}
-                        className="text-xs text-text-muted hover:text-text h-6 px-2"
+                        className="text-xs text-text-muted hover:text-text h-6 px-2 w-fit"
                       >
                         Clear all
                       </Button>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {allTags.slice(0, 12).map((tag, i) => (
+                                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                     {allTags.slice(0, typeof window !== 'undefined' && window.innerWidth < 640 ? 6 : 12).map((tag, i) => (
                       <Badge 
                         key={i} 
-                        className={`cursor-pointer transition-all duration-200 ${
+                        className={`cursor-pointer transition-all duration-200 text-xs ${
                           selectedTags.includes(tag)
                             ? "bg-secondary text-white shadow-md scale-105 border-secondary"
                             : "bg-muted hover:bg-secondary/10 text-text-muted hover:text-secondary border-border hover:border-secondary/30"
@@ -867,21 +868,21 @@ const QueriesPage = () => {
                       >
                         {tag}
                         {selectedTags.includes(tag) && (
-                          <span className="ml-2 text-xs">×</span>
+                          <span className="ml-1.5 text-xs">×</span>
                         )}
                       </Badge>
                     ))}
-                    {allTags.length > 12 && (
+                                         {allTags.length > (typeof window !== 'undefined' && window.innerWidth < 640 ? 6 : 12) && (
                       <Badge 
-                        className="bg-muted/50 text-text-muted cursor-pointer hover:bg-muted"
+                        className="bg-muted/50 text-text-muted cursor-pointer hover:bg-muted text-xs"
                         onClick={() => setShowAdvancedFilters(true)}
                       >
-                        +{allTags.length - 12} more
+                                                 +{allTags.length - (typeof window !== 'undefined' && window.innerWidth < 640 ? 6 : 12)} more
                       </Badge>
                     )}
                   </div>
                   {selectedTags.length > 0 && (
-                    <div className="mt-2 text-sm text-text-muted">
+                    <div className="mt-2 text-xs sm:text-sm text-text-muted">
                       Showing questions tagged with: {selectedTags.join(', ')}
                     </div>
                   )}
@@ -889,180 +890,183 @@ const QueriesPage = () => {
                 
                 {/* Advanced Filters */}
                 {showAdvancedFilters && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-6 pt-6 border-t border-border bg-muted/20 rounded-lg p-6"
-                  >
-                    <h4 className="text-lg font-semibold text-text mb-4">Advanced Filters</h4>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                      <div>
-                        <Label className="text-text font-medium mb-3 block flex items-center">
-                          <Filter className="h-4 w-4 mr-2" />
-                          Category
-                        </Label>
-                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                          <SelectTrigger className="w-full bg-card border-border text-text hover:border-secondary/50 transition-colors">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-card border-border text-text">
-                            {allCategories.map((category, i) => (
-                              <SelectItem key={i} value={category} className="hover:bg-secondary/10">
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <Label className="text-text font-medium mb-3 block flex items-center">
-                          <Badge className="h-4 w-4 mr-2" />
-                          Status
-                        </Label>
-                        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                          <SelectTrigger className="w-full bg-card border-border text-text hover:border-secondary/50 transition-colors">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-card border-border text-text">
-                            <SelectItem value="All" className="hover:bg-secondary/10">All</SelectItem>
-                            <SelectItem value="Open" className="hover:bg-secondary/10">Open</SelectItem>
-                            <SelectItem value="Answered" className="hover:bg-secondary/10">Answered</SelectItem>
-                            <SelectItem value="Solved" className="hover:bg-secondary/10">Solved</SelectItem>
-                            <SelectItem value="Closed" className="hover:bg-secondary/10">Closed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <Label className="text-text font-medium mb-3 block flex items-center">
-                          <Clock className="h-4 w-4 mr-2" />
-                          Date Range
-                        </Label>
-                        <Select value={dateRange} onValueChange={setDateRange}>
-                          <SelectTrigger className="w-full bg-card border-border text-text hover:border-secondary/50 transition-colors">
-                            <SelectValue placeholder="Select date range" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-card border-border text-text">
-                            <SelectItem value="all" className="hover:bg-secondary/10">All Time</SelectItem>
-                            <SelectItem value="today" className="hover:bg-secondary/10">Today</SelectItem>
-                            <SelectItem value="week" className="hover:bg-secondary/10">This Week</SelectItem>
-                            <SelectItem value="month" className="hover:bg-secondary/10">This Month</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    
-                    <div className="mb-6">
-                      <Label className="text-text font-medium mb-3 block">Quick Filters</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                        <div className="flex items-center space-x-3 p-3 bg-card rounded-lg border border-border hover:border-secondary/30 transition-colors">
-                          <Checkbox 
-                            id="answered-only" 
-                            checked={showAnsweredOnly}
-                            onCheckedChange={(checked) => {
-                              setShowAnsweredOnly(checked)
-                              if (checked) setShowUnansweredOnly(false)
-                            }}
-                            className="border-border"
-                          />
-                          <Label htmlFor="answered-only" className="text-text text-sm font-medium cursor-pointer">
-                            Answered only
-                          </Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-3 p-3 bg-card rounded-lg border border-border hover:border-secondary/30 transition-colors">
-                          <Checkbox 
-                            id="unanswered-only" 
-                            checked={showUnansweredOnly}
-                            onCheckedChange={(checked) => {
-                              setShowUnansweredOnly(checked)
-                              if (checked) setShowAnsweredOnly(false)
-                            }}
-                            className="border-border"
-                          />
-                          <Label htmlFor="unanswered-only" className="text-text text-sm font-medium cursor-pointer">
-                            Unanswered only
-                          </Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-3 p-3 bg-card rounded-lg border border-border hover:border-secondary/30 transition-colors">
-                          <Checkbox 
-                            id="verified-only" 
-                            checked={showVerifiedOnly}
-                            onCheckedChange={setShowVerifiedOnly}
-                            className="border-border"
-                          />
-                          <Label htmlFor="verified-only" className="text-text text-sm font-medium cursor-pointer">
-                            With verified answers
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-text-muted">
-                        {filteredQueries.length} questions match your filters
-                      </div>
-                      <div className="flex space-x-3">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => {
-                            setSearchQuery("")
-                            setSelectedCategory("All")
-                            setSelectedStatus("All")
-                            setSelectedTags([])
-                            setDateRange("all")
-                            setShowAnsweredOnly(false)
-                            setShowUnansweredOnly(false)
-                            setShowVerifiedOnly(false)
-                          }}
-                          className="border-border text-text hover:bg-muted"
-                        >
-                          Reset All Filters
-                        </Button>
-                        <Button 
-                          onClick={() => setShowAdvancedFilters(false)}
-                          className="bg-secondary hover:bg-secondary/90 text-white"
-                        >
-                          Apply Filters
-                        </Button>
-                      </div>
-                    </div>
-                  </motion.div>
+                                      <motion.div 
+                     initial={{ opacity: 0, height: 0 }}
+                     animate={{ opacity: 1, height: "auto" }}
+                     exit={{ opacity: 0, height: 0 }}
+                     transition={{ duration: 0.3 }}
+                     className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border bg-muted/20 rounded-lg p-3 sm:p-6"
+                   >
+                     <h4 className="text-base sm:text-lg font-semibold text-text mb-3 sm:mb-4">Advanced Filters</h4>
+                     
+                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                       <div>
+                         <Label className="text-text font-medium mb-2 sm:mb-3 block flex items-center text-sm">
+                           <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                           Category
+                         </Label>
+                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                           <SelectTrigger className="w-full bg-card border-border text-text hover:border-secondary/50 transition-colors text-sm">
+                             <SelectValue placeholder="Select category" />
+                           </SelectTrigger>
+                           <SelectContent className="bg-card border-border text-text">
+                             {allCategories.map((category, i) => (
+                               <SelectItem key={i} value={category} className="hover:bg-secondary/10 text-sm">
+                                 {category}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </div>
+                       
+                       <div>
+                         <Label className="text-text font-medium mb-2 sm:mb-3 block flex items-center text-sm">
+                           <Badge className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                           Status
+                         </Label>
+                         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                           <SelectTrigger className="w-full bg-card border-border text-text hover:border-secondary/50 transition-colors text-sm">
+                             <SelectValue placeholder="Select status" />
+                           </SelectTrigger>
+                           <SelectContent className="bg-card border-border text-text">
+                             <SelectItem value="All" className="hover:bg-secondary/10 text-sm">All</SelectItem>
+                             <SelectItem value="Open" className="hover:bg-secondary/10 text-sm">Open</SelectItem>
+                             <SelectItem value="Answered" className="hover:bg-secondary/10 text-sm">Answered</SelectItem>
+                             <SelectItem value="Solved" className="hover:bg-secondary/10 text-sm">Solved</SelectItem>
+                             <SelectItem value="Closed" className="hover:bg-secondary/10 text-sm">Closed</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
+                       
+                       <div className="sm:col-span-2 lg:col-span-1">
+                         <Label className="text-text font-medium mb-2 sm:mb-3 block flex items-center text-sm">
+                           <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                           Date Range
+                         </Label>
+                         <Select value={dateRange} onValueChange={setDateRange}>
+                           <SelectTrigger className="w-full bg-card border-border text-text hover:border-secondary/50 transition-colors text-sm">
+                             <SelectValue placeholder="Select date range" />
+                           </SelectTrigger>
+                           <SelectContent className="bg-card border-border text-text">
+                             <SelectItem value="all" className="hover:bg-secondary/10 text-sm">All Time</SelectItem>
+                             <SelectItem value="today" className="hover:bg-secondary/10 text-sm">Today</SelectItem>
+                             <SelectItem value="week" className="hover:bg-secondary/10 text-sm">This Week</SelectItem>
+                             <SelectItem value="month" className="hover:bg-secondary/10 text-sm">This Month</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
+                     </div>
+                     
+                     <div className="mb-4 sm:mb-6">
+                       <Label className="text-text font-medium mb-2 sm:mb-3 block text-sm">Quick Filters</Label>
+                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                         <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-card rounded-lg border border-border hover:border-secondary/30 transition-colors">
+                           <Checkbox 
+                             id="answered-only" 
+                             checked={showAnsweredOnly}
+                             onCheckedChange={(checked) => {
+                               setShowAnsweredOnly(checked)
+                               if (checked) setShowUnansweredOnly(false)
+                             }}
+                             className="border-border"
+                           />
+                           <Label htmlFor="answered-only" className="text-text text-xs sm:text-sm font-medium cursor-pointer">
+                             Answered only
+                           </Label>
+                         </div>
+                         
+                         <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-card rounded-lg border border-border hover:border-secondary/30 transition-colors">
+                           <Checkbox 
+                             id="unanswered-only" 
+                             checked={showUnansweredOnly}
+                             onCheckedChange={(checked) => {
+                               setShowUnansweredOnly(checked)
+                               if (checked) setShowAnsweredOnly(false)
+                             }}
+                             className="border-border"
+                           />
+                           <Label htmlFor="unanswered-only" className="text-text text-xs sm:text-sm font-medium cursor-pointer">
+                             Unanswered only
+                           </Label>
+                         </div>
+                         
+                         <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-card rounded-lg border border-border hover:border-secondary/30 transition-colors sm:col-span-2 lg:col-span-1">
+                           <Checkbox 
+                             id="verified-only" 
+                             checked={showVerifiedOnly}
+                             onCheckedChange={setShowVerifiedOnly}
+                             className="border-border"
+                           />
+                           <Label htmlFor="verified-only" className="text-text text-xs sm:text-sm font-medium cursor-pointer">
+                             With verified answers
+                           </Label>
+                         </div>
+                       </div>
+                     </div>
+                     
+                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                       <div className="text-xs sm:text-sm text-text-muted">
+                         {filteredQueries.length} questions match your filters
+                       </div>
+                       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                         <Button 
+                           variant="outline" 
+                           onClick={() => {
+                             setSearchQuery("")
+                             setSelectedCategory("All")
+                             setSelectedStatus("All")
+                             setSelectedTags([])
+                             setDateRange("all")
+                             setShowAnsweredOnly(false)
+                             setShowUnansweredOnly(false)
+                             setShowVerifiedOnly(false)
+                           }}
+                           className="border-border text-text hover:bg-muted text-sm w-full sm:w-auto"
+                         >
+                           Reset All Filters
+                         </Button>
+                         <Button 
+                           onClick={() => setShowAdvancedFilters(false)}
+                           className="bg-secondary hover:bg-secondary/90 text-white text-sm w-full sm:w-auto"
+                         >
+                           Apply Filters
+                         </Button>
+                       </div>
+                     </div>
+                   </motion.div>
                 )}
               </div>
               
-              <Tabs defaultValue="browse" className="mb-6">
-                <TabsList className="bg-card border border-border grid grid-cols-3 h-auto p-1 w-full sm:w-auto rounded-lg">
+              <Tabs defaultValue="browse" className="mb-4 sm:mb-6">
+                <TabsList className="bg-card border border-border grid grid-cols-3 h-auto p-1 w-full rounded-lg">
                   <TabsTrigger 
                     value="browse" 
-                    className="py-3 px-6 data-[state=active]:bg-secondary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:border-b-2 data-[state=active]:border-secondary font-medium transition-all duration-300"
+                    className="py-2.5 px-2 sm:py-3 sm:px-6 data-[state=active]:bg-secondary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:border-b-2 data-[state=active]:border-secondary font-medium transition-all duration-300 text-xs sm:text-sm"
                   >
-                    <div className="flex items-center space-x-2">
-                      <Search className="h-4 w-4" />
-                      <span>Browse Questions</span>
+                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <Search className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Browse Questions</span>
+                      <span className="sm:hidden">Browse</span>
                     </div>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="my-questions" 
-                    className="py-3 px-6 data-[state=active]:bg-secondary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:border-b-2 data-[state=active]:border-secondary font-medium transition-all duration-300"
+                    className="py-2.5 px-2 sm:py-3 sm:px-6 data-[state=active]:bg-secondary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:border-b-2 data-[state=active]:border-secondary font-medium transition-all duration-300 text-xs sm:text-sm"
                   >
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>My Questions</span>
+                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">My Questions</span>
+                      <span className="sm:hidden">Mine</span>
                     </div>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="my-answers" 
-                    className="py-3 px-6 data-[state=active]:bg-secondary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:border-b-2 data-[state=active]:border-secondary font-medium transition-all duration-300"
+                    className="py-2.5 px-2 sm:py-3 sm:px-6 data-[state=active]:bg-secondary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:border-b-2 data-[state=active]:border-secondary font-medium transition-all duration-300 text-xs sm:text-sm"
                   >
-                    <div className="flex items-center space-x-2">
-                      <MessageCircle className="h-4 w-4" />
-                      <span>My Answers</span>
+                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">My Answers</span>
+                      <span className="sm:hidden">Answers</span>
                     </div>
                   </TabsTrigger>
                 </TabsList>
@@ -1094,60 +1098,89 @@ const QueriesPage = () => {
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-8">{filteredQueries.map((query) => (
+                    <div className="space-y-4 sm:space-y-8">{filteredQueries.map((query) => (
                       <Card 
                         key={query.id} 
                         className="bg-card border-border shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:border-secondary/30"
                         onClick={() => handleQueryClick(query)}
                       >
-                        <CardContent className="p-8">
-                          <div className="flex justify-between items-start mb-6">
-                            <div className="flex-1 pr-6">
-                              <div className="flex items-start justify-between mb-4">
-                                <h2 className="text-2xl font-bold text-text hover:text-secondary transition-colors duration-200 leading-tight">
+                        <CardContent className="p-4 sm:p-6 lg:p-8">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 sm:mb-6">
+                            <div className="flex-1 sm:pr-6">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 sm:mb-4">
+                                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text hover:text-secondary transition-colors duration-200 leading-tight mb-2 sm:mb-0">
                                   {query.title}
                                 </h2>
-                                <div className="flex items-center space-x-2 ml-4">
+                                <div className="flex items-center justify-between sm:justify-start space-x-2 sm:ml-4">
                                   <div className="flex items-center space-x-1">
                                     <button 
-                                      className="p-1 hover:bg-muted rounded transition-colors"
+                                      className="p-2 sm:p-1 hover:bg-muted rounded transition-colors touch-none"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         // Handle upvote
                                       }}
                                     >
-                                      <ChevronUp className="h-4 w-4 text-text-muted hover:text-green-500" />
+                                      <ChevronUp className="h-5 w-5 sm:h-4 sm:w-4 text-text-muted hover:text-green-500" />
                                     </button>
-                                    <span className="text-sm font-medium text-text">{query.votes}</span>
+                                    <span className="text-sm font-medium text-text min-w-[20px] text-center">{query.votes}</span>
                                     <button 
-                                      className="p-1 hover:bg-muted rounded transition-colors"
+                                      className="p-2 sm:p-1 hover:bg-muted rounded transition-colors touch-none"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         // Handle downvote
                                       }}
                                     >
-                                      <ChevronDown className="h-4 w-4 text-text-muted hover:text-red-500" />
+                                      <ChevronDown className="h-5 w-5 sm:h-4 sm:w-4 text-text-muted hover:text-red-500" />
                                     </button>
                                   </div>
+                                  <Badge className={`ml-4 sm:hidden ${
+                                    query.status === "Open" 
+                                      ? "bg-green-500/10 text-green-500 border-green-500/30" 
+                                      : query.status === "Answered"
+                                      ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                                      : query.status === "Solved"
+                                      ? "bg-purple-500/10 text-purple-500 border-purple-500/30"
+                                      : "bg-gray-500/10 text-gray-500 border-gray-500/30"
+                                  }`}>
+                                    {query.status}
+                                  </Badge>
                                 </div>
                               </div>
                               
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {query.tags.map((tag, i) => (
-                                  <Badge key={i} className="bg-secondary/10 text-secondary border border-secondary/30 hover:bg-secondary/20 transition-colors">
+                              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                                {query.tags.slice(0, 3).map((tag, i) => (
+                                  <Badge key={i} className="bg-secondary/10 text-secondary border border-secondary/30 hover:bg-secondary/20 transition-colors text-xs">
                                     {tag}
                                   </Badge>
                                 ))}
+                                {query.tags.length > 3 && (
+                                  <Badge className="bg-muted text-text-muted text-xs">
+                                    +{query.tags.length - 3} more
+                                  </Badge>
+                                )}
                               </div>
                               
-                              <div className="mb-4">
-                                <p className="text-text-muted leading-relaxed line-clamp-3 text-base">
-                                  {query.body.length > 200 ? `${query.body.substring(0, 200)}...` : query.body}
+                              <div className="mb-3 sm:mb-4">
+                                <p className="text-text-muted leading-relaxed line-clamp-2 sm:line-clamp-3 text-sm sm:text-base">
+                                  {query.body.length > 150 ? `${query.body.substring(0, 150)}...` : query.body}
                                 </p>
+                              </div>
+                              
+                              <div className="flex items-center justify-between sm:hidden mb-3">
+                                <div className="flex items-center space-x-4 text-text-muted text-sm">
+                                  <div className="flex items-center space-x-1">
+                                    <Eye className="h-4 w-4" />
+                                    <span>{query.views}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <MessageCircle className="h-4 w-4" />
+                                    <span>{query.answers}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                             
-                            <div className="flex flex-col items-end space-y-3">
+                            <div className="hidden sm:flex flex-col items-end space-y-3">
                               <Badge className={`${
                                 query.status === "Open" 
                                   ? "bg-green-500/10 text-green-500 border-green-500/30" 
@@ -1174,32 +1207,33 @@ const QueriesPage = () => {
                           </div>
                           
                           {query.codeSnippet && (
-                            <div className="mb-6 bg-muted/50 p-4 rounded-lg border border-border overflow-x-auto">
-                              <pre className="text-text-muted text-sm font-mono">
+                            <div className="mb-4 sm:mb-6 bg-muted/50 p-3 sm:p-4 rounded-lg border border-border overflow-x-auto">
+                              <pre className="text-text-muted text-xs sm:text-sm font-mono">
                                 <code>{query.codeSnippet}</code>
                               </pre>
                             </div>
                           )}
                           
-                          <div className="flex justify-between items-center pt-4 border-t border-border">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-3 sm:pt-4 border-t border-border gap-3 sm:gap-0">
                             <div className="flex items-center space-x-3">
-                              <Avatar className="h-10 w-10 border-2 border-muted">
+                              <Avatar className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-muted">
                                 <AvatarImage src={query.author.avatar} />
-                                <AvatarFallback className="bg-secondary/10 text-secondary font-medium">
+                                <AvatarFallback className="bg-secondary/10 text-secondary font-medium text-xs sm:text-sm">
                                   {query.author.name.split(' ').map(n => n[0]).join('')}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <div className="text-text font-medium">{query.author.name}</div>
-                                <div className="flex items-center text-text-muted text-sm">
+                                <div className="text-text font-medium text-sm sm:text-base">{query.author.name}</div>
+                                <div className="flex items-center text-text-muted text-xs sm:text-sm">
                                   <Clock className="h-3 w-3 mr-1" />
                                   <span>{query.date}</span>
                                 </div>
                               </div>
                             </div>
                             
-                            <div className="text-text-muted text-sm">
-                              Click to view details and answers
+                            <div className="text-text-muted text-xs sm:text-sm text-center sm:text-right">
+                              <span className="hidden sm:inline">Click to view details and answers</span>
+                              <span className="sm:hidden">Tap to view details</span>
                             </div>
                           </div>
                         </CardContent>
