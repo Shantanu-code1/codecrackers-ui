@@ -189,9 +189,9 @@ export const submitQuery = async (queryData) => {
         if (!userDataStr) {
             throw new Error('No user data found in localStorage');
         }
-        
+        console.log('userDataStr', userDataStr);
         const userData = JSON.parse(userDataStr);
-        const studentId = userData.id;
+        const studentId = userData.studentId;
         
         if (!studentId) {
             throw new Error('No student ID found in user data');
@@ -251,7 +251,7 @@ export const getQueries = async () => {
         }
         
         const userData = JSON.parse(userDataStr);
-        const studentId = userData.id;
+        const studentId = userData.studentId;
         
         if (!studentId) {
             throw new Error('No student ID found in user data');
@@ -335,7 +335,7 @@ export const submitAnswer = async (queryId, answerData) => {
         }
         
         const userData = JSON.parse(userDataStr);
-        let studentId = userData.id;
+        let studentId = userData.studentId;
         const payload = {
             ...answerData,
             studentId: studentId // Include the student ID who is answering

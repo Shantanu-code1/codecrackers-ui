@@ -30,6 +30,7 @@ const signuporloginStore = create((set, get) => ({
                 localStorage.setItem('loggedIn', true);
                 
                 // Basic user info
+                console.log('response.data', response);
                 const userRole = response.data.role;
                 console.log("User role detected:", userRole); // Debug log
                 
@@ -37,7 +38,7 @@ const signuporloginStore = create((set, get) => ({
                 const userData = {
                     email: userForm.email,
                     role: userRole,
-                    
+                    studentId: response.data.studentId,
                     // Other fields will be filled when profile is loaded
                 };
                 
