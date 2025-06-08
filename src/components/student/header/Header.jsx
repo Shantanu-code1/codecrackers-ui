@@ -37,12 +37,12 @@ const Header = () => {
     <header className='fixed top-0 left-0 right-0 z-50 flex justify-center'>
       {/* Centered Rounded Header Container */}
       <motion.div 
-        className="bg-gradient-to-r from-[#161B22]/95 to-[#1A2233]/95 backdrop-blur-md rounded-full shadow-lg border border-[#30363D]/30 mt-4 mx-4"
+        className="bg-gradient-to-r from-[#161B22]/95 to-[#1A2233]/95 backdrop-blur-md rounded-full shadow-lg border border-[#30363D]/30 mt-3 sm:mt-4 mx-3 sm:mx-4"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 w-[23rem] sm:w-96 md:min-w-[1000px] md:max-w-9xl">
+        <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-10 py-3 w-[20rem] sm:w-[24rem] md:w-[42rem] lg:w-[50rem] xl:w-[60rem] 2xl:max-w-7xl">
           {/* Logo Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -51,18 +51,18 @@ const Header = () => {
             className="flex items-center flex-shrink-0"
           >
             <Link to={userRole === "ROLE_TEACHER" ? "/teacher/dashboard" : "/student/ai-tutor"} className="text-text">
-              <img src={logo} alt="NiqSolve" className="w-20 h-8 sm:w-24 sm:h-9 object-contain" />
+              <img src={logo} alt="NiqSolve" className="w-16 h-7 sm:w-20 sm:h-8 md:w-24 md:h-9 lg:w-28 lg:h-10 object-contain" />
             </Link>
           </motion.div>
           
-          {/* Navigation Items - Desktop */}
+          {/* Navigation Items - Desktop & Tablet */}
           <motion.nav
             className="hidden md:flex items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <div className="flex items-center space-x-10">
+            <div className="flex items-center space-x-4 md:space-x-6 lg:space-x-8 xl:space-x-10">
               {userRole === "ROLE_TEACHER" ? (
                 <>
                   {["Doubts", "Earnings", "Queries", "Profile"].map((item, index) => (
@@ -79,7 +79,7 @@ const Header = () => {
                           ? `/student/${item.toLowerCase()}`
                           : `/teacher/${item.toLowerCase()}`
                         }
-                        className={`text-xs lg:text-sm font-medium transition-all duration-200 px-4 py-2 rounded-lg whitespace-nowrap ${
+                        className={`text-xs md:text-sm lg:text-base font-medium transition-all duration-200 px-2 md:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap ${
                           isActive(item.toLowerCase()) 
                             ? "text-[#0070F3] font-semibold" 
                             : "text-[#E5E7EB] hover:text-[#0070F3] hover:bg-[#0070F3]/5"
@@ -103,7 +103,7 @@ const Header = () => {
                     >
                       <Link
                         to={`/student/${item.toLowerCase()}`}
-                        className={`text-xs lg:text-sm font-medium transition-all duration-200 px-4 py-2 rounded-lg whitespace-nowrap ${
+                        className={`text-xs md:text-sm lg:text-base font-medium transition-all duration-200 px-2 md:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap ${
                           isActive(item.toLowerCase()) 
                             ? "text-secondary font-semibold" 
                             : "text-text hover:text-secondary hover:bg-secondary/5"
@@ -139,7 +139,7 @@ const Header = () => {
       
       {/* Mobile Navigation - Dropdown */}
       <motion.div 
-        className="md:hidden fixed top-20 left-4 right-4 bg-gradient-to-r from-[#161B22]/95 to-[#1A2233]/95 backdrop-blur-md border border-[#30363D]/30 rounded-2xl shadow-lg"
+        className="md:hidden fixed top-16 sm:top-20 left-3 right-3 sm:left-4 sm:right-4 bg-gradient-to-r from-[#161B22]/95 to-[#1A2233]/95 backdrop-blur-md border border-[#30363D]/30 rounded-2xl shadow-lg"
         initial={{ height: 0, opacity: 0 }}
         animate={{ height: isMobileMenuOpen ? "auto" : 0, opacity: isMobileMenuOpen ? 1 : 0 }}
         exit={{ height: 0, opacity: 0 }}
@@ -155,7 +155,7 @@ const Header = () => {
                     ? `/student/${item.toLowerCase()}`
                     : `/teacher/${item.toLowerCase()}`
                   }
-                  className={`block text-xs font-medium transition-all duration-200 px-3 py-2 rounded-lg ${
+                  className={`block text-sm font-medium transition-all duration-200 px-3 py-3 rounded-lg ${
                     isActive(item.toLowerCase()) 
                       ? "text-[#0070F3] bg-[#0070F3]/10 font-semibold border border-[#0070F3]/30" 
                       : "text-[#E5E7EB] hover:text-[#0070F3] hover:bg-[#0070F3]/5"
@@ -172,7 +172,7 @@ const Header = () => {
                 <Link
                   key={item}
                   to={`/student/${item.toLowerCase()}`}
-                  className={`block text-xs font-medium transition-all duration-200 px-3 py-2 rounded-lg ${
+                  className={`block text-sm font-medium transition-all duration-200 px-3 py-3 rounded-lg ${
                     isActive(item.toLowerCase()) 
                       ? "text-[#0070F3] bg-[#0070F3]/10 font-semibold border border-[#0070F3]/30" 
                       : "text-[#E5E7EB] hover:text-[#0070F3] hover:bg-[#0070F3]/5"

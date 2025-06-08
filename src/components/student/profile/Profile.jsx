@@ -96,28 +96,28 @@ const ProfilePage = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-b from-primary via-primary/95 to-primary text-text pt-[6rem] sm:pt-[8rem] pb-8 sm:pb-16 px-3 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-b from-primary via-primary/95 to-primary text-text pt-[6rem] sm:pt-[7rem] md:pt-[8rem] pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Background decorations */}
         <div className="absolute top-0 right-0 w-1/3 h-1/4 bg-gradient-to-b from-secondary/5 to-transparent rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-1/4 h-1/3 bg-gradient-to-t from-secondary/5 to-transparent rounded-full blur-[150px] pointer-events-none" />
         
-        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-8">
+        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 md:space-y-8">
           {/* Profile Header Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-                      >
+          >
             <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-xl rounded-xl overflow-hidden">
-              <CardContent className="p-4 sm:p-8">
+              <CardContent className="p-4 sm:p-6 md:p-8">
                 {/* Profile Section */}
-                <div className="flex flex-col lg:flex-row lg:items-start space-y-4 sm:space-y-6 lg:space-y-0 lg:space-x-8 mb-6 sm:mb-8">
+                <div className="flex flex-col md:flex-row lg:flex-row md:items-start space-y-4 sm:space-y-6 md:space-y-0 md:space-x-6 lg:space-x-8 mb-6 sm:mb-8">
                   {/* Avatar Section */}
-                  <div className="flex flex-col items-center lg:items-start">
+                  <div className="flex flex-col items-center md:items-start lg:items-start">
                     <div className="relative">
-                      <Avatar className="h-24 w-24 sm:h-32 sm:w-32 cursor-pointer" onClick={handleImageClick}>
+                      <Avatar className="h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 cursor-pointer" onClick={handleImageClick}>
                         <AvatarImage src={editMode ? tempPersonalInfo.avatar : profile.personalInfo.avatar} alt={profile.personalInfo.name} />
-                        <AvatarFallback className="bg-muted text-text text-xl sm:text-3xl">
+                        <AvatarFallback className="bg-muted text-text text-xl sm:text-2xl md:text-3xl">
                       {profile.personalInfo.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
@@ -125,9 +125,9 @@ const ProfilePage = () => {
                         <Button 
                           size="sm" 
                           onClick={handleImageClick}
-                          className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full p-0 bg-secondary hover:bg-secondary/90"
+                          className="absolute -bottom-2 -right-2 h-8 w-8 md:h-10 md:w-10 rounded-full p-0 bg-secondary hover:bg-secondary/90"
                         >
-                          <Camera className="h-5 w-5" />
+                          <Camera className="h-4 w-4 md:h-5 md:w-5" />
                         </Button>
                       )}
                       <input
@@ -194,21 +194,21 @@ const ProfilePage = () => {
                     ) : (
                       <>
                         <div>
-                          <h2 className="text-2xl sm:text-3xl font-bold text-text mb-2">{profile.personalInfo.name}</h2>
-                          <p className="text-text-muted mb-4">{profile.personalInfo.bio}</p>
+                          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text mb-2">{profile.personalInfo.name}</h2>
+                          <p className="text-text-muted mb-4 text-sm md:text-base">{profile.personalInfo.bio}</p>
                           
-                          <div className="flex flex-wrap gap-4 text-sm text-text-muted">
+                          <div className="flex flex-wrap gap-3 md:gap-4 text-sm text-text-muted">
                             <div className="flex items-center">
                               <Mail className="h-4 w-4 mr-2" />
-                              <span>{profile.personalInfo.email}</span>
+                              <span className="text-xs md:text-sm">{profile.personalInfo.email}</span>
                             </div>
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 mr-2" />
-                              <span>{profile.personalInfo.location}</span>
+                              <span className="text-xs md:text-sm">{profile.personalInfo.location}</span>
                           </div>
                             <div className="flex items-center">
                               <Calendar className="h-4 w-4 mr-2" />
-                              <span>Joined {profile.personalInfo.joinDate}</span>
+                              <span className="text-xs md:text-sm">Joined {profile.personalInfo.joinDate}</span>
                           </div>
                           </div>
                         </div>
@@ -216,7 +216,7 @@ const ProfilePage = () => {
                     )}
                     
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+                    <div className="flex flex-col sm:flex-row md:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
                       {editMode ? (
                         <>
                           <PrimaryButton onClick={toggleEditMode}>
@@ -263,19 +263,19 @@ const ProfilePage = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-xl rounded-xl overflow-hidden">
-              <CardContent className="p-4 sm:p-8">
+              <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="mb-4 sm:mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-text mb-2">Performance Overview</h2>
-                  <p className="text-text-muted">Track your learning progress and achievements</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-text mb-2">Performance Overview</h2>
+                  <p className="text-text-muted text-sm md:text-base">Track your learning progress and achievements</p>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {/* Doubt Asking Streak */}
                   <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl p-4 sm:p-6 border border-orange-500/20 hover:shadow-lg transition-all duration-300">
                     <div className="text-center">
-                      <div className="text-4xl mb-2">🔥</div>
-                      <h3 className="text-xl sm:text-2xl font-bold text-orange-400 mb-2">{profile.doubtStreak.current} Days</h3>
-                      <p className="text-text-muted mb-4">Asking Streak</p>
+                      <div className="text-3xl md:text-4xl mb-2">🔥</div>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-400 mb-2">{profile.doubtStreak.current} Days</h3>
+                      <p className="text-text-muted mb-4 text-sm md:text-base">Asking Streak</p>
                       
                       <div className="space-y-3 text-sm">
                         <div className="bg-muted/50 rounded-lg p-3">
@@ -297,9 +297,9 @@ const ProfilePage = () => {
                   {/* Doubts Solved */}
                   <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-xl p-4 sm:p-6 border border-green-500/20 hover:shadow-lg transition-all duration-300">
                     <div className="text-center">
-                      <div className="text-4xl mb-2">✅</div>
-                      <h3 className="text-xl sm:text-2xl font-bold text-green-400 mb-2">{profile.stats.doubtsSolved}</h3>
-                      <p className="text-text-muted mb-4">Doubts Solved</p>
+                      <div className="text-3xl md:text-4xl mb-2">✅</div>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-green-400 mb-2">{profile.stats.doubtsSolved}</h3>
+                      <p className="text-text-muted mb-4 text-sm md:text-base">Doubts Solved</p>
                       
                       <div className="space-y-3 text-sm">
                         <div className="bg-muted/50 rounded-lg p-3">
@@ -321,18 +321,18 @@ const ProfilePage = () => {
                   </div>
                   
                   {/* Quick Actions */}
-                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-4 sm:p-6 border border-blue-500/20 hover:shadow-lg transition-all duration-300 sm:col-span-2 lg:col-span-1">
+                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-4 sm:p-6 border border-blue-500/20 hover:shadow-lg transition-all duration-300 md:col-span-2 lg:col-span-1">
                     <div className="space-y-4">
                       <div className="text-center">
-                        <div className="text-4xl mb-2">⚡</div>
-                        <h4 className="text-base sm:text-lg font-semibold text-text mb-4">Quick Actions</h4>
+                        <div className="text-3xl md:text-4xl mb-2">⚡</div>
+                        <h4 className="text-base sm:text-lg md:text-xl font-semibold text-text mb-4">Quick Actions</h4>
                         </div>
                         
-                      <Button className="w-full bg-secondary hover:bg-secondary/90 text-white">
+                      <Button className="w-full bg-secondary hover:bg-secondary/90 text-white text-sm md:text-base py-2 md:py-3">
                         <User className="h-4 w-4 mr-2" />
                         Ask a Question
                       </Button>
-                      <Button variant="outline" className="w-full border-border text-text hover:bg-muted">
+                      <Button variant="outline" className="w-full border-border text-text hover:bg-muted text-sm md:text-base py-2 md:py-3">
                         <Edit className="h-4 w-4 mr-2" />
                         View My Doubts
                       </Button>
@@ -359,23 +359,23 @@ const ProfilePage = () => {
             transition={{ duration: 0.7, delay: 0.2 }}
           >
             <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-xl rounded-xl overflow-hidden">
-              <CardContent className="p-4 sm:p-8">
+              <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="mb-4 sm:mb-6">
                   <div className="flex items-center mb-2">
                     <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-red-400 mr-2 sm:mr-3" />
-                    <h2 className="text-xl sm:text-2xl font-bold text-text">Key Areas to Improve</h2>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-text">Key Areas to Improve</h2>
                   </div>
-                  <p className="text-text-muted">Focus on these topics to boost your success rate</p>
+                  <p className="text-text-muted text-sm md:text-base">Focus on these topics to boost your success rate</p>
                         </div>
                         
                 <div className="bg-gradient-to-br from-red-500/5 to-red-600/3 rounded-xl p-4 sm:p-6 border border-red-500/10">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
                       {profile.improvementAreas.map((area, index) => (
                         <div key={index} className="bg-muted/50 rounded-lg p-3 sm:p-4 border border-border/30">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                              <h4 className="font-semibold text-text mb-1">{area.topic}</h4>
-                              <p className="text-sm text-text-muted">{area.doubtsCount} doubts posted</p>
+                              <h4 className="font-semibold text-text mb-1 text-sm md:text-base">{area.topic}</h4>
+                              <p className="text-xs md:text-sm text-text-muted">{area.doubtsCount} doubts posted</p>
                             </div>
                             <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                               area.priority === 'high' ? 'bg-red-500/20 text-red-400' :
@@ -427,7 +427,7 @@ const ProfilePage = () => {
                   <div className="mt-6 p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-center text-sm text-text-muted">
                       <AlertTriangle className="h-4 w-4 mr-2 text-yellow-400" />
-                      <span>Focus on high-priority areas first. Practice regularly to improve your success rate!</span>
+                      <span className="text-xs md:text-sm">Focus on high-priority areas first. Practice regularly to improve your success rate!</span>
                     </div>
                     </div>
                   </div>
