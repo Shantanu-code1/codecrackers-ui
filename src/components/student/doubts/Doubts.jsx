@@ -275,18 +275,18 @@ const EnhancedDoubtPage = () => {
       
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-[7rem]">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-20 md:pt-24">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-3 md:gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-[#E5E7EB] flex items-center">
-              <span className="mr-3 text-4xl">🚀</span>
+            <h1 className="text-2xl md:text-3xl font-semibold text-[#E5E7EB] flex items-center">
+              <span className="mr-2 md:mr-3 text-3xl md:text-4xl">🚀</span>
               Coding Doubts
             </h1>
-            <p className="text-[#A1A1AA] mt-1">Get instant AI insights + expert guidance</p>
+            <p className="text-sm md:text-base text-[#A1A1AA] mt-1">Get instant AI insights + expert guidance</p>
           </div>
           
           <Button 
-            className="bg-gradient-to-r from-[#0070F3] to-[#3b82f6] hover:opacity-90 hover:scale-105 text-white shadow-md shadow-[#0070F3]/20 flex items-center transition-all duration-200"
+            className="bg-gradient-to-r from-[#0070F3] to-[#3b82f6] hover:opacity-90 hover:scale-105 text-white shadow-md shadow-[#0070F3]/20 flex items-center transition-all duration-200 w-full md:w-auto text-sm md:text-base"
             onClick={() => setIsAskModalOpen(true)}
           >
             <Sparkles className="w-4 h-4 mr-2" />
@@ -294,38 +294,38 @@ const EnhancedDoubtPage = () => {
           </Button>
         </div>
 
-        {/* Enhanced Search and filter bar */}
-        <Card className="bg-gradient-to-r from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] mb-6 shadow-lg overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-4">
-              {/* Search Bar */}
+        {/* Enhanced Search and filter bar - Mobile Optimized */}
+        <Card className="bg-gradient-to-r from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] mb-4 md:mb-6 shadow-lg overflow-hidden">
+          <CardContent className="p-3 md:p-6">
+            <div className="flex flex-col gap-3 md:gap-4">
+              {/* Search Bar - Mobile Optimized */}
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#A1A1AA]" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#A1A1AA] w-4 h-4 md:w-5 md:h-5" />
                 <Input
-                  placeholder="Search doubts, code snippets, or error messages..." 
-                  className="pl-10 bg-[#0D1117] border-[#30363D] text-[#E5E7EB] w-full focus:ring-[#0070F3] focus:border-[#0070F3] h-12"
+                  placeholder="Search doubts..." 
+                  className="pl-10 bg-[#0D1117] border-[#30363D] text-[#E5E7EB] w-full focus:ring-[#0070F3] focus:border-[#0070F3] h-10 md:h-12 text-sm md:text-base"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               
-              {/* Active Filters Indicator */}
+              {/* Active Filters Indicator - Mobile Optimized */}
               {(selectedStatus !== "All" || selectedLanguage !== "All Languages" || sortBy !== "newest") && (
-                <div className="flex items-center gap-2 pb-2 border-b border-[#30363D]/30">
-                  <span className="text-xs text-[#A1A1AA] font-medium">Active filters:</span>
+                <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-[#30363D]/30">
+                  <span className="text-xs text-[#A1A1AA] font-medium">Filters:</span>
                   {selectedStatus !== "All" && (
                     <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
-                      Status: {selectedStatus}
+                      {selectedStatus}
                     </Badge>
                   )}
                   {selectedLanguage !== "All Languages" && (
                     <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
-                      Language: {selectedLanguage}
+                      {selectedLanguage}
                     </Badge>
                   )}
                   {sortBy !== "newest" && (
                     <Badge className="bg-[#0070F3]/10 text-[#0070F3] border-[#0070F3]/30 text-xs">
-                      Sort: {sortOptions.find(s => s.value === sortBy)?.label}
+                      {sortOptions.find(s => s.value === sortBy)?.label}
                     </Badge>
                   )}
                   <Button
@@ -338,27 +338,27 @@ const EnhancedDoubtPage = () => {
                       setSortBy("newest");
                     }}
                   >
-                    Clear all
+                    Clear
                   </Button>
                 </div>
               )}
               
-              {/* Enhanced Filters */}
-              <div className="flex flex-wrap gap-3">
-                {/* Status Filter */}
+              {/* Enhanced Filters - Mobile Grid Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
+                {/* Status Filter - Mobile Optimized */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors ${
+                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors w-full text-sm md:text-base h-9 md:h-10 ${
                         selectedStatus !== "All" 
                           ? "bg-[#0070F3]/10 border-[#0070F3]/30 text-[#0070F3]" 
                           : "bg-[#0D1117]"
                       }`}
                     >
-                      <AlertCircle className="w-4 h-4 mr-2" />
-                      Status: {selectedStatus}
-                      <ChevronDown className="w-4 h-4 ml-2" />
+                      <AlertCircle className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Status: </span>{selectedStatus}
+                      <ChevronDown className="w-3 h-3 md:w-4 md:h-4 ml-1 md:ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
@@ -415,20 +415,20 @@ const EnhancedDoubtPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Language Filter */}
+                {/* Language Filter - Mobile Optimized */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors ${
+                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors w-full text-sm md:text-base h-9 md:h-10 ${
                         selectedLanguage !== "All Languages" 
                           ? "bg-[#0070F3]/10 border-[#0070F3]/30 text-[#0070F3]" 
                           : "bg-[#0D1117]"
                       }`}
                     >
-                      <Code className="w-4 h-4 mr-2" />
+                      <Code className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                       {selectedLanguage === "All Languages" ? "Language" : selectedLanguage}
-                      <ChevronDown className="w-4 h-4 ml-2" />
+                      <ChevronDown className="w-3 h-3 md:w-4 md:h-4 ml-1 md:ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
@@ -443,20 +443,20 @@ const EnhancedDoubtPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Sort Options */}
+                {/* Sort Options - Mobile Optimized */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors ${
+                      className={`border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 transition-colors w-full text-sm md:text-base h-9 md:h-10 ${
                         sortBy !== "newest" 
                           ? "bg-[#0070F3]/10 border-[#0070F3]/30 text-[#0070F3]" 
                           : "bg-[#0D1117]"
                       }`}
                     >
-                      <TrendingUp className="w-4 h-4 mr-2" />
-                      Sort: {sortOptions.find(s => s.value === sortBy)?.label}
-                      <ChevronDown className="w-4 h-4 ml-2" />
+                      <TrendingUp className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Sort: </span>{sortOptions.find(s => s.value === sortBy)?.label}
+                      <ChevronDown className="w-3 h-3 md:w-4 md:h-4 ml-1 md:ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
@@ -474,25 +474,25 @@ const EnhancedDoubtPage = () => {
           </CardContent>
         </Card>
 
-        {/* Main content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Main content - Mobile Optimized Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Left panel - Enhanced Doubts list */}
-          <div className="md:col-span-2">
-            <div className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border border-[#30363D] rounded-lg shadow-lg p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-[#E5E7EB] flex items-center">
-                  <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
+          <div className="lg:col-span-2">
+            <div className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border border-[#30363D] rounded-lg shadow-lg p-3 md:p-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-2 md:gap-0">
+                <h2 className="text-lg md:text-xl font-semibold text-[#E5E7EB] flex items-center">
+                  <span className="mr-2 md:mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-5 md:h-6 w-1 md:w-1.5 rounded-full"></span>
                   Coding Doubts
                 </h2>
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-[#0070F3]/10 text-[#0070F3] border border-[#0070F3]/30 px-3 py-1">
-                    Showing {sortedDoubts.length} of {doubtsData.length} results
+                <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
+                  <Badge className="bg-[#0070F3]/10 text-[#0070F3] border border-[#0070F3]/30 px-2 md:px-3 py-1 text-xs flex-1 md:flex-none text-center">
+                    {sortedDoubts.length} of {doubtsData.length} results
                   </Badge>
                 </div>
               </div>
               
-              {/* Enhanced scrollable container with better spacing */}
-              <div className="max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+              {/* Enhanced scrollable container with better spacing - Mobile Optimized */}
+              <div className="max-h-[600px] md:max-h-[700px] overflow-y-auto pr-1 md:pr-2 custom-scrollbar">
                 {isLoading ? (
                   // Enhanced skeleton loaders
                   <div className="space-y-6">
@@ -532,7 +532,7 @@ const EnhancedDoubtPage = () => {
                     </Button>
                   </div>
                 ) : sortedDoubts.length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6">
                     <AnimatePresence>
                       {sortedDoubts.map((doubt) => (
                         <motion.div
@@ -569,8 +569,8 @@ const EnhancedDoubtPage = () => {
             </div>
           </div>
           
-          {/* Right panel - Enhanced Stats */}
-          <div className="md:col-span-1">
+          {/* Right panel - Enhanced Stats - Mobile Optimized */}
+          <div className="lg:col-span-1 order-first lg:order-last">
             <EnhancedDoubtsStats 
               doubtsData={doubtsData} 
               isLoading={isLoading} 
@@ -582,13 +582,13 @@ const EnhancedDoubtPage = () => {
       </div>
 
       <Dialog open={isAskModalOpen} onOpenChange={setIsAskModalOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB]">
+        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold flex items-center">
-              <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
+            <DialogTitle className="text-lg md:text-xl font-semibold flex items-center">
+              <span className="mr-2 md:mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-5 md:h-6 w-1 md:w-1.5 rounded-full"></span>
               Ask a Question
             </DialogTitle>
-            <DialogDescription className="text-[#A1A1AA]">
+            <DialogDescription className="text-sm md:text-base text-[#A1A1AA]">
               Provide details about your coding question to get instant AI insights + expert answers.
             </DialogDescription>
           </DialogHeader>
@@ -703,22 +703,23 @@ const EnhancedDoubtPage = () => {
             </div>
           </div>
           
-          <DialogFooter className="flex justify-between items-center pt-4 border-t border-[#30363D]/50">
-            <div className="text-xs text-[#A1A1AA] flex items-center">
+          <DialogFooter className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 pt-4 border-t border-[#30363D]/50">
+            <div className="text-xs text-[#A1A1AA] flex items-center order-2 md:order-1">
               <Bot className="w-3 h-3 mr-1" />
-              AI will analyze your question instantly upon submission
+              <span className="hidden md:inline">AI will analyze your question instantly upon submission</span>
+              <span className="md:hidden">AI analysis on submission</span>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto order-1 md:order-2">
               <Button 
                 variant="outline" 
-                className="border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30"
+                className="border-[#30363D] text-[#E5E7EB] hover:bg-[#30363D]/30 w-full md:w-auto"
                 onClick={() => setIsAskModalOpen(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button 
-                className="bg-gradient-to-r from-[#0070F3] to-[#3b82f6] hover:opacity-90"
+                className="bg-gradient-to-r from-[#0070F3] to-[#3b82f6] hover:opacity-90 w-full md:w-auto"
                 onClick={handleAskQuestion}
                 disabled={isSubmitting}
               >
@@ -912,27 +913,31 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,112,243,0.15)] hover:border-[#0070F3]/30 hover:scale-[1.02] group cursor-pointer" onClick={handleViewDetails}>
-      <CardHeader className="pb-4 border-b border-[#30363D]/50">
-        <div className="flex justify-between items-start mb-3">
+    <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,112,243,0.15)] hover:border-[#0070F3]/30 hover:scale-[1.01] md:hover:scale-[1.02] group cursor-pointer" onClick={handleViewDetails}>
+      <CardHeader className="pb-3 md:pb-4 border-b border-[#30363D]/50 p-3 md:p-6">
+        <div className="flex justify-between items-start mb-2 md:mb-3">
           <div className="flex items-start flex-1">
-            <span className="text-2xl mr-3 flex-shrink-0">{techIcon}</span>
+            <span className="text-lg md:text-2xl mr-2 md:mr-3 flex-shrink-0">{techIcon}</span>
             <div className="flex-1 min-w-0">
-              {/* Enhanced title with better typography */}
-              <CardTitle className="text-xl font-bold text-[#E5E7EB] group-hover:text-[#0070F3] transition-colors line-clamp-2 pr-2 leading-tight">
+              {/* Enhanced title with better typography - Mobile Optimized */}
+              <CardTitle className="text-base md:text-xl font-bold text-[#E5E7EB] group-hover:text-[#0070F3] transition-colors line-clamp-2 pr-1 md:pr-2 leading-tight">
                 {safeTitle}
               </CardTitle>
               
-              {/* Primary info row - most important for scanning */}
-              <div className="flex items-center gap-4 mt-3">
-                <Badge className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs font-medium px-2 py-1">
-                  <span className="mr-1">{techIcon}</span>
-                  {safeTopic}
-                </Badge>
-                <span className={`text-xs font-semibold ${urgencyInfo.color} flex items-center`}>
-                  <Timer className="w-3 h-3 mr-1" />
-                  {urgencyInfo.text}
-                </span>
+              {/* Primary info row - Mobile Optimized for smaller screens */}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mt-2 md:mt-3">
+                <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+                  <Badge className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs font-medium px-2 py-1">
+                    <span className="mr-1">{techIcon}</span>
+                    <span className="hidden sm:inline">{safeTopic}</span>
+                    <span className="sm:hidden">{safeTopic.substring(0, 8)}{safeTopic.length > 8 ? '...' : ''}</span>
+                  </Badge>
+                  <span className={`text-xs font-semibold ${urgencyInfo.color} flex items-center`}>
+                    <Timer className="w-3 h-3 mr-1" />
+                    <span className="hidden sm:inline">{urgencyInfo.text}</span>
+                    <span className="sm:hidden">{urgencyInfo.text.split(' ')[0]}</span>
+                  </span>
+                </div>
                 {assignedTeacher && (
                   <div className="flex items-center text-xs text-[#0070F3]">
                     <img 
@@ -940,23 +945,24 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
                       alt={assignedTeacher.name}
                       className="w-4 h-4 rounded-full mr-1"
                     />
-                    <span className="font-medium">{assignedTeacher.name}</span>
+                    <span className="font-medium hidden sm:inline">{assignedTeacher.name}</span>
+                    <span className="font-medium sm:hidden">{assignedTeacher.name.split(' ')[0]}</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
           
-          {/* Action buttons */}
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Action buttons - Mobile Optimized */}
+          <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-8 w-8 p-0 hover:bg-[#0070F3]/10 transition-colors"
+                  className="h-7 w-7 md:h-8 md:w-8 p-0 hover:bg-[#0070F3]/10 transition-colors"
                 >
-                  <MoreHorizontal className="w-4 h-4" />
+                  <MoreHorizontal className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
@@ -973,45 +979,45 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
           </div>
         </div>
 
-        {/* Enhanced description with better readability */}
-        <CardDescription className="text-[#A1A1AA] text-sm line-clamp-2 leading-relaxed mt-2 font-normal">
+        {/* Enhanced description with better readability - Mobile Optimized */}
+        <CardDescription className="text-[#A1A1AA] text-xs md:text-sm line-clamp-2 leading-relaxed mt-1 md:mt-2 font-normal">
           {safeDescription}
-          {safeDescription.length > 120 && (
+          {safeDescription.length > 80 && (
             <span className="text-[#0070F3] hover:underline ml-1 cursor-pointer font-medium">
-              read more
+              more
             </span>
           )}
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="p-4 space-y-4">
-        {/* Code snippet preview */}
+      <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
+        {/* Code snippet preview - Mobile Optimized */}
         {safeCodeSnippet && (
-          <div className="bg-[#0D1117] border border-[#30363D] rounded-lg p-3 overflow-hidden">
+          <div className="bg-[#0D1117] border border-[#30363D] rounded-lg p-2 md:p-3 overflow-hidden">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center text-xs text-[#A1A1AA]">
                 <Code className="w-3 h-3 mr-1" />
                 Code Preview
               </div>
-              <Button size="sm" variant="ghost" className="h-6 px-2 text-xs hover:bg-[#30363D]/30">
+              <Button size="sm" variant="ghost" className="h-5 md:h-6 px-1 md:px-2 text-xs hover:bg-[#30363D]/30">
                 <Play className="w-3 h-3 mr-1" />
-                Expand
+                <span className="hidden sm:inline">Expand</span>
               </Button>
             </div>
-            <pre className="text-[#E5E7EB] font-mono text-xs whitespace-pre line-clamp-3 overflow-hidden">
+            <pre className="text-[#E5E7EB] font-mono text-xs whitespace-pre line-clamp-2 md:line-clamp-3 overflow-hidden">
               {safeCodeSnippet}
             </pre>
           </div>
         )}
         
-        {/* Tags - distinguish from categories */}
+        {/* Tags - Mobile Optimized */}
         {safeTags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <span className="text-xs text-[#A1A1AA] font-medium mr-2 flex items-center">
-              <span className="w-1 h-1 rounded-full bg-[#A1A1AA] mr-2"></span>
-              Tags:
+          <div className="flex flex-wrap gap-1 md:gap-2">
+            <span className="text-xs text-[#A1A1AA] font-medium mr-1 md:mr-2 flex items-center">
+              <span className="w-1 h-1 rounded-full bg-[#A1A1AA] mr-1 md:mr-2"></span>
+              <span className="hidden sm:inline">Tags:</span>
             </span>
-            {safeTags.slice(0, 3).map((tag, index) => (
+            {safeTags.slice(0, 2).map((tag, index) => (
               <Badge 
                 key={`${tag}-${index}`} 
                 variant="outline" 
@@ -1020,34 +1026,36 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
                 #{tag}
               </Badge>
             ))}
-            {safeTags.length > 3 && (
+            {safeTags.length > 2 && (
               <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs rounded-full">
-                +{safeTags.length - 3} more
+                +{safeTags.length - 2}
               </Badge>
             )}
           </div>
         )}
         
-        {/* Enhanced footer with clearer status */}
-        <div className="flex justify-between items-center pt-3 border-t border-[#30363D]/50">
-          <div className="flex items-center gap-3">
+        {/* Enhanced footer with clearer status - Mobile Optimized */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 pt-3 border-t border-[#30363D]/50">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 w-full md:w-auto">
             <Badge 
-              className={`text-xs flex items-center px-3 py-1 ${enhancedStatus.color}`}
+              className={`text-xs flex items-center px-2 md:px-3 py-1 ${enhancedStatus.color}`}
             >
               <enhancedStatus.icon className="w-3 h-3 mr-1" />
               {enhancedStatus.text}
             </Badge>
             
-            {/* Engagement metrics - only show if meaningful */}
-            <div className="flex items-center text-xs text-[#A1A1AA] gap-3">
+            {/* Engagement metrics - Mobile Optimized */}
+            <div className="flex items-center text-xs text-[#A1A1AA] gap-2 md:gap-3">
               <span className="flex items-center">
                 <Clock className="w-3 h-3 mr-1" />
-                {formatRelativeTime(safeDate)}
+                <span className="hidden sm:inline">{formatRelativeTime(safeDate)}</span>
+                <span className="sm:hidden">{formatRelativeTime(safeDate).split(' ')[0]}</span>
               </span>
               {hasAISuggestions && (
                 <span className="flex items-center text-[#0070F3]">
                   <Sparkles className="w-3 h-3 mr-1" />
-                  AI ready
+                  <span className="hidden sm:inline">AI ready</span>
+                  <span className="sm:hidden">AI</span>
                 </span>
               )}
             </div>
@@ -1056,10 +1064,11 @@ function EnhancedDoubtCard({ doubt, onAddActivity }) {
           <Button
             size="sm"
             variant="ghost"
-            className="text-xs text-[#0070F3] hover:bg-[#0070F3]/10 h-7 px-3 font-medium"
+            className="text-xs text-[#0070F3] hover:bg-[#0070F3]/10 h-6 md:h-7 px-2 md:px-3 font-medium w-full md:w-auto"
             onClick={handleViewDetails}
           >
-            View Details
+            <span className="md:hidden">View</span>
+            <span className="hidden md:inline">View Details</span>
             <ChevronRight className="w-3 h-3 ml-1" />
           </Button>
         </div>
@@ -1180,61 +1189,61 @@ function EnhancedDoubtsStats({ doubtsData, isLoading, recentActivities, onCatego
   }, [recentActivities]);
 
   return (
-    <div className="space-y-6">
-      {/* Enhanced Summary Card */}
+    <div className="space-y-4 md:space-y-6">
+      {/* Enhanced Summary Card - Mobile Optimized */}
       <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
-        <CardHeader className="pb-4 border-b border-[#30363D]/50">
-          <CardTitle className="text-xl font-semibold flex items-center">
-            <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
+        <CardHeader className="pb-3 md:pb-4 border-b border-[#30363D]/50 p-3 md:p-6">
+          <CardTitle className="text-lg md:text-xl font-semibold flex items-center">
+            <span className="mr-2 md:mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-5 md:h-6 w-1 md:w-1.5 rounded-full"></span>
             Summary
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-5">
+        <CardContent className="p-3 md:p-5">
           {isLoading ? (
-            <div className="grid grid-cols-2 gap-4 animate-pulse">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 animate-pulse">
               {Array(4).fill(0).map((_, i) => (
-                <div key={i} className="bg-[#0D1117] rounded-xl p-4 border border-[#30363D]">
-                  <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 rounded-full bg-[#30363D] mr-3"></div>
+                <div key={i} className="bg-[#0D1117] rounded-xl p-3 md:p-4 border border-[#30363D]">
+                  <div className="flex items-center mb-2 md:mb-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#30363D] mr-2 md:mr-3"></div>
                     <div>
-                      <div className="h-3 bg-[#30363D] rounded w-20 mb-1"></div>
-                      <div className="h-2 bg-[#30363D] rounded w-16"></div>
+                      <div className="h-3 bg-[#30363D] rounded w-16 md:w-20 mb-1"></div>
+                      <div className="h-2 bg-[#30363D] rounded w-12 md:w-16"></div>
                     </div>
                   </div>
-                  <div className="h-7 bg-[#30363D] rounded w-12"></div>
+                  <div className="h-6 md:h-7 bg-[#30363D] rounded w-10 md:w-12"></div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {stats.map((stat, index) => (
                 <motion.div 
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className={`bg-gradient-to-br from-[#0D1117] to-[#0D1117]/80 rounded-xl p-4 border transition-all duration-200 hover:scale-105 cursor-pointer ${
+                  className={`bg-gradient-to-br from-[#0D1117] to-[#0D1117]/80 rounded-xl p-3 md:p-4 border transition-all duration-200 hover:scale-[1.02] md:hover:scale-105 cursor-pointer ${
                     stat.highlight 
                       ? 'border-[#0070F3]/30 bg-gradient-to-br from-[#0070F3]/5 to-[#0070F3]/10 hover:border-[#0070F3]/50' 
                       : 'border-[#30363D] hover:border-[#30363D]/80'
                   }`}
                 >
-                  <div className="flex items-center mb-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 ${
+                  <div className="flex items-center mb-2 md:mb-3">
+                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center mr-2 md:mr-3 ${
                       stat.highlight 
                         ? 'bg-gradient-to-br from-[#0070F3]/20 to-[#0070F3]/10' 
                         : 'bg-[#30363D]/20'
                     }`}>
-                      <stat.icon className={`w-5 h-5 ${
+                      <stat.icon className={`w-4 h-4 md:w-5 md:h-5 ${
                         stat.color || (stat.highlight ? 'text-[#0070F3]' : 'text-[#A1A1AA]')
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-[#A1A1AA] truncate">{stat.label}</p>
-                      <p className="text-xs text-[#A1A1AA]/70">{stat.subtext}</p>
+                      <p className="text-xs md:text-sm text-[#A1A1AA] truncate">{stat.label}</p>
+                      <p className="text-xs text-[#A1A1AA]/70 line-clamp-1">{stat.subtext}</p>
                     </div>
                   </div>
-                  <p className={`text-2xl font-bold ${
+                  <p className={`text-xl md:text-2xl font-bold ${
                     stat.color || (stat.highlight ? 'text-[#0070F3]' : 'text-[#E5E7EB]')
                   }`}>
                     {stat.value}
@@ -1246,22 +1255,22 @@ function EnhancedDoubtsStats({ doubtsData, isLoading, recentActivities, onCatego
         </CardContent>
       </Card>
 
-      {/* Enhanced Top Categories Card with clickable items */}
+      {/* Enhanced Top Categories Card with clickable items - Mobile Optimized */}
       <Card className="bg-gradient-to-br from-[#161B22] to-[#1A2233] border-[#30363D] text-[#E5E7EB] shadow-lg overflow-hidden">
-        <CardHeader className="pb-4 border-b border-[#30363D]/50">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-xl font-semibold flex items-center">
-              <span className="mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-6 w-1.5 rounded-full"></span>
+        <CardHeader className="pb-3 md:pb-4 border-b border-[#30363D]/50 p-3 md:p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0">
+            <CardTitle className="text-lg md:text-xl font-semibold flex items-center">
+              <span className="mr-2 md:mr-3 bg-gradient-to-r from-[#0070F3] to-[#3b82f6] h-5 md:h-6 w-1 md:w-1.5 rounded-full"></span>
               Top Categories
             </CardTitle>
             {!isLoading && doubtsData.length > 0 && (
-              <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D]">
-                {topCategories.length} trending topics
+              <Badge variant="outline" className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs">
+                {topCategories.length} trending
               </Badge>
             )}
           </div>
         </CardHeader>
-        <CardContent className="p-5">
+        <CardContent className="p-3 md:p-5">
           {isLoading ? (
             <div className="space-y-4 animate-pulse">
               {Array(5).fill(0).map((_, i) => (
@@ -1290,28 +1299,28 @@ function EnhancedDoubtsStats({ doubtsData, isLoading, recentActivities, onCatego
                     className="group cursor-pointer"
                     onClick={() => onCategoryFilter(category.name)}
                   >
-                    <div className="flex items-center justify-between mb-2 p-3 rounded-lg hover:bg-[#0D1117]/50 transition-all duration-200 group-hover:scale-[1.02]">
+                    <div className="flex items-center justify-between mb-2 p-2 md:p-3 rounded-lg hover:bg-[#0D1117]/50 transition-all duration-200 group-hover:scale-[1.01] md:group-hover:scale-[1.02]">
                       <div className="flex items-center flex-1">
                         <div 
-                          className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 text-lg font-bold"
+                          className="w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center mr-2 md:mr-3 text-sm md:text-lg font-bold"
                           style={{ backgroundColor: `${category.color}20`, color: category.color }}
                         >
                           {category.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#E5E7EB] font-medium group-hover:text-[#0070F3] transition-colors truncate">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-0">
+                            <span className="text-sm md:text-base text-[#E5E7EB] font-medium group-hover:text-[#0070F3] transition-colors truncate">
                               {category.name}
                             </span>
-                            <div className="flex items-center ml-4">
-                              <span className="text-[#A1A1AA] text-sm mr-2">{category.count}</span>
+                            <div className="flex items-center">
+                              <span className="text-xs md:text-sm text-[#A1A1AA] mr-1 md:mr-2">{category.count}</span>
                               <Badge className="bg-[#0D1117] text-[#A1A1AA] border-[#30363D] text-xs">
                                 {category.percentage}%
                               </Badge>
                             </div>
                           </div>
                           <motion.div 
-                            className="w-full h-2 bg-[#0D1117] rounded-full overflow-hidden mt-2"
+                            className="w-full h-1.5 md:h-2 bg-[#0D1117] rounded-full overflow-hidden mt-1 md:mt-2"
                             initial={{ width: "0%" }}
                             animate={{ width: "100%" }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -1326,7 +1335,7 @@ function EnhancedDoubtsStats({ doubtsData, isLoading, recentActivities, onCatego
                           </motion.div>
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-[#A1A1AA] group-hover:text-[#0070F3] opacity-0 group-hover:opacity-100 transition-all" />
+                      <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-[#A1A1AA] group-hover:text-[#0070F3] opacity-0 group-hover:opacity-100 transition-all" />
                     </div>
                   </motion.div>
                 ))}
