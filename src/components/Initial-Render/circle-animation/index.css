@@ -11,16 +11,26 @@
 }
 
 .imgs {
-  transition: transform 0.3s ease, margin 1s ease-in-out;
+  transition: transform 0.3s ease, margin 1s ease-in-out, box-shadow 0.3s ease;
   border-radius: 50%;
   object-fit: cover;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
 }
 
 /* Desktop hover effects */
 @media (min-width: 768px) {
   .imgs:hover {
-    transform: scale(1.1);
+    transform: scale(1.15);
     z-index: 10;
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.4),
+      0 20px 25px -5px rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(59, 130, 246, 0.5);
+    border-color: rgba(59, 130, 246, 0.6);
   }
 }
 
@@ -33,7 +43,15 @@
   
   .imgs {
     /* Smaller hover effect on mobile for better touch interaction */
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 6px;
+  }
+  
+  .imgs:hover {
+    transform: scale(1.05);
+    box-shadow: 
+      0 15px 30px -8px rgba(0, 0, 0, 0.3),
+      0 10px 15px -3px rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -42,6 +60,37 @@
   .circle-container {
     padding: 0 2rem;
   }
+  
+  .imgs {
+    padding: 7px;
+  }
+  
+  .imgs:hover {
+    transform: scale(1.1);
+    box-shadow: 
+      0 20px 40px -10px rgba(0, 0, 0, 0.35),
+      0 15px 20px -5px rgba(255, 255, 255, 0.15),
+      0 0 15px rgba(59, 130, 246, 0.4);
+  }
+}
+
+/* Glassmorphism enhancement for tech icons */
+.imgs::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+}
+
+.imgs::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1));
+  pointer-events: none;
 }
 
 

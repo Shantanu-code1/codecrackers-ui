@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '', role: 'ROLE_STUDENT' });
   const canvasRef = useRef(null);
   const navigate = useNavigate();
+  
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -26,30 +27,28 @@ export default function SignupPage() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const leaves = [];
+    const particles = [];
 
-    for (let i = 0; i < 50; i++) {
-      leaves.push({
+    for (let i = 0; i < 80; i++) {
+      particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 5 + 5,
+        size: Math.random() * 4 + 2,
         speed: Math.random() * 0.5 + 0.1,
         angle: Math.random() * 360,
-        color: `rgba(99, 102, 241, ${Math.random() * 0.3 + 0.1})`
+        color: `rgba(${59 + Math.random() * 40}, ${130 + Math.random() * 50}, ${246}, ${Math.random() * 0.4 + 0.1})`
       });
     }
 
-    function drawLeaf(x, y, size, angle, color) {
+    function drawParticle(x, y, size, angle, color) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(angle * Math.PI / 180);
       ctx.fillStyle = color;
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = color;
       ctx.beginPath();
-      ctx.moveTo(0, -size / 2);
-      ctx.quadraticCurveTo(size / 2, -size / 2, size / 2, 0);
-      ctx.quadraticCurveTo(size / 2, size / 2, 0, size / 2);
-      ctx.quadraticCurveTo(-size / 2, size / 2, -size / 2, 0);
-      ctx.quadraticCurveTo(-size / 2, -size / 2, 0, -size / 2);
+      ctx.arc(0, 0, size, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -57,14 +56,14 @@ export default function SignupPage() {
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      leaves.forEach(leaf => {
-        leaf.y += leaf.speed;
-        leaf.angle += 0.1;
-        if (leaf.y > canvas.height) {
-          leaf.y = -leaf.size;
-          leaf.x = Math.random() * canvas.width;
+      particles.forEach(particle => {
+        particle.y += particle.speed;
+        particle.angle += 0.5;
+        if (particle.y > canvas.height) {
+          particle.y = -particle.size;
+          particle.x = Math.random() * canvas.width;
         }
-        drawLeaf(leaf.x, leaf.y, leaf.size, leaf.angle, leaf.color);
+        drawParticle(particle.x, particle.y, particle.size, particle.angle, particle.color);
       });
 
       requestAnimationFrame(animate);
@@ -109,90 +108,101 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="bg-[#0D1117] min-h-screen flex items-center justify-center overflow-hidden">
+    <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-screen flex items-center justify-center overflow-hidden relative">
+      {/* Glassmorphism Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"></div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
+      
       <canvas ref={canvasRef} className="absolute inset-0" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="bg-[#161B22] backdrop-blur-md rounded-lg p-8 shadow-lg border border-[#30363D]">
+        <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl">
           <div className="flex items-center justify-center mb-6">
-            <Leaf className="h-10 w-10 text-[#7C39E7]" />
-            <h2 className="text-2xl font-bold ml-2 text-[#E5E7EB]">Grow With Us</h2>
+            <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 p-3 rounded-xl backdrop-blur-sm border border-white/30">
+              <Leaf className="h-10 w-10 text-cyan-300" />
+            </div>
+            <h2 className="text-2xl font-bold ml-3 text-white">Grow With Us</h2>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-[#E5E7EB]">Your Name</Label>
+              <Label htmlFor="name" className="text-white/90">Your Name</Label>
               <Input
                 id="name"
                 name="name"
                 required
-                className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] focus:ring-[#7C39E7] focus:border-[#7C39E7]"
+                className="backdrop-blur-sm bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white/20 transition-all duration-300"
                 placeholder="Enter your name"
                 value={formData.name}
                 onChange={handleInputChange}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#E5E7EB]">Email</Label>
+              <Label htmlFor="email" className="text-white/90">Email</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] focus:ring-[#7C39E7] focus:border-[#7C39E7]"
+                className="backdrop-blur-sm bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white/20 transition-all duration-300"
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleInputChange}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#E5E7EB]">Phone</Label>
+              <Label htmlFor="phoneNumber" className="text-white/90">Phone</Label>
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
                 type="phoneNumber"
                 required
-                className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] focus:ring-[#7C39E7] focus:border-[#7C39E7]"
+                className="backdrop-blur-sm bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white/20 transition-all duration-300"
                 placeholder="Enter your phone number"
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role" className="text-[#E5E7EB]">Your Role</Label>
+              <Label htmlFor="role" className="text-white/90">Your Role</Label>
               <Select name="role" onValueChange={(value) => handleSelectChange('role', value)}>
-                <SelectTrigger className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB]">
+                <SelectTrigger className="backdrop-blur-sm bg-white/10 border-white/30 text-white focus:ring-cyan-500 focus:border-cyan-500">
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#161B22] border-[#30363D] text-[#E5E7EB]">
+                <SelectContent className="backdrop-blur-md bg-white/10 border-white/20 text-white">
                   <SelectItem value="ROLE_STUDENT">Student</SelectItem>
                   <SelectItem value="ROLE_TEACHER">Teacher</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#E5E7EB]">Password</Label>
+              <Label htmlFor="password" className="text-white/90">Password</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
                 required
-                className="bg-[#0D1117] border-[#30363D] text-[#E5E7EB] focus:ring-[#7C39E7] focus:border-[#7C39E7]"
+                className="backdrop-blur-sm bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white/20 transition-all duration-300"
                 placeholder="Create a password"
                 value={formData.password}
                 onChange={handleInputChange}
               />
             </div>
-            <Button type="submit" className="w-full bg-[#7C39E7] hover:bg-indigo-700">
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+            >
               Join Our Community
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-[#A1A1AA]">
+          <p className="mt-4 text-center text-sm text-white/70">
             Already have an account?{" "}
-            <a href="/login" className="text-[#7C39E7] hover:underline">
+            <a href="/login" className="text-cyan-300 hover:text-cyan-200 transition-colors">
               Sign in
             </a>
           </p>

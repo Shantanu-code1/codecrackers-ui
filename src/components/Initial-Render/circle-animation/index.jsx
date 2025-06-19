@@ -282,7 +282,7 @@ const ImagesCircle = () => {
       style={{
         height: isShrunk ? `${shrunkHeight}px` : `${containerHeight}px`,
         marginLeft: isShrunk && !isMobile ? '3rem' : '0',
-        paddingTop: isShrunk ? '80px' : '0', // Add space for hover cards
+        // paddingTop: isShrunk ? '80px' : '0', // Add space for hover cards
         overflow: 'visible' // Allow hover cards to show outside container
       }}
     >

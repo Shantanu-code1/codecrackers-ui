@@ -24,7 +24,7 @@ export function TryNowStepsDialog({ isOpen, onClose }) {
 
   const navigate = useNavigate();
   const handleGetStarted = () => {
-    close();
+    onClose();
     navigate('/login');
   }
 
@@ -32,47 +32,49 @@ export function TryNowStepsDialog({ isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
-          <DialogContent className="sm:max-w-[525px] bg-white">
+          <DialogContent className="sm:max-w-[525px] backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-center text-gray-900">Get Started in 4 Easy Steps</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-center text-white bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
+                Get Started in 4 Easy Steps
+              </DialogTitle>
             </DialogHeader>
             <motion.div 
-          className="max-w-5xl mx-auto mb-12"
-          initial="hidden"
-          animate="visible"
-          variants={staggerChildren}
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { step: 1, title: 'Post Your Doubt', description: 'Share your question in detail.' },
-              { step: 2, title: 'Get Matched', description: 'We find your ideal expert or you do.' },
-              { step: 3, title: 'Receive Link', description: 'Join the meeting with the expert.' },
-              { step: 4, title: 'Apply Knowledge', description: 'Solve similar problems confidently.' },
-            ].map((step) => (
-              <motion.div 
-                key={step.step} 
-                className="bg-white p-4 rounded-lg shadow-md text-center relative overflow-hidden"
-                variants={fadeIn}
-                whileHover={{ y: -3, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
-              >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
-                <motion.div 
-                  className="bg-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mb-2 text-sm font-bold"
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {step.step}
-                </motion.div>
-                <h3 className="text-sm font-semibold mb-1">{step.title}</h3>
-                <p className="text-xs text-gray-600">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+              className="max-w-5xl mx-auto mb-6"
+              initial="hidden"
+              animate="visible"
+              variants={staggerChildren}
+            >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { step: 1, title: 'Post Your Doubt', description: 'Share your question in detail.' },
+                  { step: 2, title: 'Get Matched', description: 'We find your ideal expert or you do.' },
+                  { step: 3, title: 'Receive Link', description: 'Join the meeting with the expert.' },
+                  { step: 4, title: 'Apply Knowledge', description: 'Solve similar problems confidently.' },
+                ].map((step) => (
+                  <motion.div 
+                    key={step.step} 
+                    className="backdrop-blur-sm bg-white/10 border border-white/20 p-4 rounded-2xl text-center relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                    variants={fadeIn}
+                    whileHover={{ y: -3, scale: 1.02, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-blue-500" />
+                    <motion.div 
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mb-2 text-sm font-bold shadow-lg"
+                      whileHover={{ rotate: 360, scale: 1.1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {step.step}
+                    </motion.div>
+                    <h3 className="text-sm font-semibold mb-1 text-white">{step.title}</h3>
+                    <p className="text-xs text-white/80">{step.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
             <DialogFooter>
               <Button 
                 onClick={handleGetStarted}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white transition-colors duration-200"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
               >
                 Get Started Now
               </Button>
