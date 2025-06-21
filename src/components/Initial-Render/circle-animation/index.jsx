@@ -226,7 +226,7 @@ const ImagesCircle = () => {
   const circleRadius = isMobile ? 120 : isTablet ? 160 : 200 // Circle radius
   const imageSize = isMobile ? 40 : isTablet ? 50 : 60 // Image size
   const containerHeight = isMobile ? 280 : isTablet ? 340 : 400 // Container height
-  const shrunkHeight = isMobile ? 160 : isTablet ? 150 : 200 // Shrunk height (increased for mobile two rows)
+  const shrunkHeight = isMobile ? 160 : isTablet ? 100 : 100 // Shrunk height (increased for mobile two rows)
 
   useEffect(() => {
     const handleResize = () => {
